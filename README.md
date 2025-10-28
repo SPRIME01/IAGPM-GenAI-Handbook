@@ -1,33 +1,43 @@
-# 🎓 IAGPM GenAI Handbook
-**A Comprehensive Guide to Generative AI Governance, Practices, and Management**
+# IAGPM GenAI Handbook
+
+## A Comprehensive Guide to Generative AI Governance, Practices, and Management
 
 > Empowering organizations to harness GenAI responsibly through structured frameworks, practical guidance, and proven methodologies.
 
 ---
 
-## 📋 Table of Contents
-- [What This Handbook Addresses](#-what-this-handbook-addresses)
-- [Who This Is For](#-who-this-is-for)
-- [Quick Navigation](#-quick-navigation)
-- [Handbook Structure](#-handbook-structure)
-- [Getting Started by Role](#-getting-started-by-role)
-- [Adoption & Implementation](#-adoption--implementation)
-- [Contributing](#-contributing)
-- [Support & Resources](#-support--resources)
+## Table of Contents
+
+- [What This Handbook Addresses](#what-this-handbook-addresses)
+- [Who This Is For](#who-this-is-for)
+- [Quick Navigation](#quick-navigation)
+- [Handbook Structure](#handbook-structure)
+- [Getting Started by Role](#getting-started-by-role)
+- [Adoption & Implementation](#adoption--implementation)
+- [Contributing](#contributing)
+- [Support & Resources](#support--resources)
+- [License & Usage](#license--usage)
+- [Acknowledgments](#acknowledgments)
+- [Roadmap](#roadmap)
+- [FAQ](#faq)
 
 ---
 
-## 🎯 What This Handbook Addresses
+## What This Handbook Addresses
 
 ### The Challenge
+
 Organizations implementing Generative AI face critical gaps:
+
 - **Governance vacuum**: Lack of frameworks for responsible AI deployment
 - **Risk uncertainty**: Unknown security, compliance, and ethical implications
 - **Practice fragmentation**: Teams reinventing processes without shared standards
 - **Knowledge silos**: Expertise scattered across roles without unified guidance
 
 ### Our Solution
+
 This handbook provides a comprehensive, actionable framework covering:
+
 - ✅ **Governance structures** for AI oversight and accountability
 - ✅ **Risk management** frameworks tailored to GenAI characteristics
 - ✅ **Practice guidelines** for development, deployment, and operations
@@ -35,6 +45,7 @@ This handbook provides a comprehensive, actionable framework covering:
 - ✅ **Compliance templates** aligned with emerging regulations
 
 ### Why This Handbook?
+
 | Benefit | Description |
 |---------|-------------|
 | 🏛️ **Structured Framework** | Battle-tested methodologies, not theoretical concepts |
@@ -45,7 +56,7 @@ This handbook provides a comprehensive, actionable framework covering:
 
 ---
 
-## 👥 Who This Is For
+## Who This Is For
 
 This handbook serves multiple stakeholder groups:
 
@@ -61,9 +72,10 @@ This handbook serves multiple stakeholder groups:
 
 ---
 
-## 🧭 Quick Navigation
+## Quick Navigation
 
 ### By Time Available
+
 - **⏱️ 5 minutes**: Read [Executive Summary](Executive_Summary.md) for high-level overview
 - **⏱️ 30 minutes**: Review [Quick Start Guide](Quick_Start_Guide.md) + your role-specific section
 - **⏱️ 2 hours**: Deep dive into [Handbook §2.2-2.3](Handbook.md#22-roles--accountability) (Governance Framework and Risk Management)
@@ -77,6 +89,7 @@ This handbook serves multiple stakeholder groups:
 - 📏 **Ensuring Compliance**: [Reference §2.1](Reference.md#21-regulations--frameworks-by-industry) → [Handbook §2.3.1](Handbook.md#231-business-understanding--governing) → [How-To §4](Howto.md#4-aligning-with-federal-contracting-requirements)
 
 ### Most Accessed Sections
+
 1. [Risk Assessment Template](Handbook.md#242-risk-management-table) 📊
 2. [Governance Committee Roles](Handbook.md#22-roles--accountability) 🏛️
 3. [Data Governance Guidelines](Handbook.md#236-cross-cutting-domains) 🔒
@@ -85,11 +98,12 @@ This handbook serves multiple stakeholder groups:
 
 ---
 
-## 📚 Handbook Structure
+## Handbook Structure
 
 ### Part 1: Foundations (Chapters 1-3)
-**What**: Core concepts, principles, and framework overview  
-**Who**: All audiences—essential baseline knowledge  
+
+**What**: Core concepts, principles, and framework overview
+**Who**: All audiences—essential baseline knowledge
 **Time**: ~2 hours
 
 - **Ch 1: [Framework Integration](Handbook.md#1--framework-ingestion--mapping)** - Why governance matters, key frameworks synthesized
@@ -97,8 +111,9 @@ This handbook serves multiple stakeholder groups:
 - **Ch 3: [Implementation Roadmap](Handbook.md#3--implementation-roadmap)** - Practical adoption phases
 
 ### Part 2: Governance (Chapters 4-7)
-**What**: Organizational structures, policies, and decision-making frameworks  
-**Who**: Executives, program managers, compliance officers  
+
+**What**: Organizational structures, policies, and decision-making frameworks
+**Who**: Executives, program managers, compliance officers
 **Time**: ~3 hours
 
 - **Ch 4: [Roles & Accountability](Handbook.md#22-roles--accountability)** - Committee structures, responsibilities
@@ -107,8 +122,9 @@ This handbook serves multiple stakeholder groups:
 - **Ch 7: [Cross-Cutting Functions](Handbook.md#236-cross-cutting-domains)** - Data governance, trustworthy AI
 
 ### Part 3: Risk Management (Chapters 8-11)
-**What**: Identifying, assessing, and mitigating GenAI-specific risks  
-**Who**: Security teams, compliance officers, risk managers  
+
+**What**: Identifying, assessing, and mitigating GenAI-specific risks
+**Who**: Security teams, compliance officers, risk managers
 **Time**: ~2.5 hours
 
 - **Ch 8: [Risk Framework](Reference.md#24-risk-scoring)** - Taxonomy of GenAI risks (security, ethical, operational)
@@ -117,8 +133,9 @@ This handbook serves multiple stakeholder groups:
 - **Ch 11: [Incident Management](Handbook.md#235-operationalization--management)** - Response protocols, lessons learned
 
 ### Part 4: Practices (Chapters 12-16)
-**What**: Day-to-day operational guidance for AI teams  
-**Who**: Engineers, product managers, data scientists  
+
+**What**: Day-to-day operational guidance for AI teams
+**Who**: Engineers, product managers, data scientists
 **Time**: ~4 hours
 
 - **Ch 12: [Development Lifecycle](Tutorial.md#2-step-by-step-implementation)** - From ideation to deployment
@@ -128,8 +145,9 @@ This handbook serves multiple stakeholder groups:
 - **Ch 16: [Operationalization](Handbook.md#235-operationalization--management)** - Deployment, monitoring, maintenance
 
 ### Part 5: Management (Chapters 17-20)
-**What**: Strategic program management and continuous improvement  
-**Who**: Program managers, executives, product leaders  
+
+**What**: Strategic program management and continuous improvement
+**Who**: Program managers, executives, product leaders
 **Time**: ~2.5 hours
 
 - **Ch 17: [Quick Start Guide](Quick_Start_Guide.md)** - 30-day governance launch
@@ -138,6 +156,7 @@ This handbook serves multiple stakeholder groups:
 - **Ch 20: [Continuous Improvement](Handbook.md#236-cross-cutting-domains)** - Learning and evolution
 
 ### Appendices
+
 - **A: [Templates & Checklists](Handbook.md#24-templates--samples)** - Ready-to-use artifacts
 - **B: [Tutorial & Case Studies](Tutorial.md#3-example-project-automating-clinical-trial-summaries)** - Real-world implementation examples
 - **C: [Regulatory Reference](Reference.md#21-regulations--frameworks-by-industry)** - EU AI Act, GDPR, sector-specific rules
@@ -146,14 +165,16 @@ This handbook serves multiple stakeholder groups:
 
 ---
 
-## 🎯 Getting Started by Role
+## Getting Started by Role
 
 <details>
+
 <summary><strong>🏢 For Executives & Decision Makers</strong></summary>
 
 ### Your Priority Path
+
 1. **Start here**: [Executive Summary](Executive_Summary.md) - 10 min
-2. **Understand risks**: [Executive Summary §The Challenge](Executive_Summary.md#the-business-case-for-ai-governance) - 15 min  
+2. **Understand risks**: [Executive Summary §The Challenge](Executive_Summary.md#the-business-case-for-ai-governance) - 15 min
 3. **See the framework**: [Handbook §2.2](Handbook.md#22-roles--accountability) - 30 min
 4. **Review implementation**: [Executive Summary §Strategic Implementation](Executive_Summary.md#strategic-implementation-approach) - 20 min
 
@@ -307,7 +328,7 @@ This handbook serves multiple stakeholder groups:
 
 ---
 
-## 🚀 Adoption & Implementation
+## Adoption & Implementation
 
 ### Phase 1: Foundation (Weeks 1-4)
 **Goal**: Establish baseline understanding and leadership buy-in
@@ -348,13 +369,13 @@ This handbook serves multiple stakeholder groups:
 
 ### Customization Guidance
 
-#### For Small Organizations (<100 employees)
+#### For Small Organizations (&lt;100 employees)
 - **Streamline governance**: Single AI lead vs. full committee (see Ch 4.5)
 - **Lightweight policies**: Use starter templates (Appendix A.3.1)
 - **Focus on high-risk use cases**: Prioritize customer-facing and sensitive data scenarios
 - **Leverage third-party tools**: Adopt vendor solutions where possible
 
-#### For Enterprise Organizations (>1000 employees)
+#### For Enterprise Organizations (&gt;1000 employees)
 - **Federated governance**: Hub-and-spoke model (Ch 4.3)
 - **Comprehensive policies**: Full policy suite with role-based variations
 - **Dedicated resources**: AI governance team, tools, and budget
@@ -379,13 +400,13 @@ This handbook serves multiple stakeholder groups:
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 This handbook improves through community input. We welcome contributions from practitioners, researchers, and organizations implementing GenAI governance.
 
 ### How to Contribute
 
-#### 📝 Content Contributions
+#### Content Contributions
 - **Improvements**: Clarifications, corrections, additional examples
 - **New sections**: Emerging practices, regulatory updates, case studies
 - **Templates**: Tested artifacts from your implementations
@@ -396,7 +417,7 @@ This handbook improves through community input. We welcome contributions from pr
 3. Submit pull request with clear description and rationale
 4. Await review from maintainers (typically 5-7 business days)
 
-#### 💡 Feedback & Suggestions
+#### Feedback & Suggestions
 - **Report issues**: Outdated content, broken links, unclear guidance
 - **Request topics**: Gaps in coverage, desired deep-dives
 - **Share experiences**: Implementation learnings, case studies
@@ -427,7 +448,7 @@ Significant contributions may earn co-authorship on specific chapters.
 
 ---
 
-## 📞 Support & Resources
+## Support & Resources
 
 ### Getting Help
 - 📖 **Documentation**: Full handbook content in `/docs`
@@ -443,8 +464,8 @@ Significant contributions may earn co-authorship on specific chapters.
 
 ### Handbook Maintenance
 
-**Current Version**: 1.0.0 (Released: January 2025)  
-**Last Updated**: January 15, 2025  
+**Current Version**: 1.0.0 (Released: January 2025)
+**Last Updated**: January 15, 2025
 **Next Review**: April 2025
 
 **Update Cadence**:
@@ -460,7 +481,7 @@ Significant contributions may earn co-authorship on specific chapters.
 
 ---
 
-## 📄 License & Usage
+## License & Usage
 
 ### License
 This handbook is released under [Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)](https://creativecommons.org/licenses/by-sa/4.0/).
@@ -484,7 +505,7 @@ Organizations may use this handbook internally and with clients. We encourage sh
 
 ---
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 ### Contributors
 This handbook reflects the collective wisdom of:
@@ -507,7 +528,7 @@ Development supported by [Organization Name], with contributions from [Partner O
 
 ---
 
-## 🗺️ Roadmap
+## Roadmap
 
 ### Upcoming Additions (v1.1 - Q2 2025)
 - [ ] Industry-specific playbooks (healthcare, financial services, government)
@@ -531,7 +552,7 @@ Development supported by [Organization Name], with contributions from [Partner O
 
 ---
 
-## ❓ FAQ
+## FAQ
 
 <details>
 <summary><strong>Is this handbook applicable to all AI, or just GenAI?</strong></summary>
@@ -580,14 +601,10 @@ We provide **guidance aligned with major frameworks** (EU AI Act, NIST AI RMF, e
 
 ---
 
-<div align="center">
+**Ready to dive in?** Start with [Executive Summary](Executive_Summary.md) or [Quick Start Guide](Quick_Start_Guide.md).
 
-**📘 Ready to dive in? Start with [Executive Summary](Executive_Summary.md) or [Quick Start Guide](Quick_Start_Guide.md)**
-
-*Questions? Feedback? Reach out via [GitHub Discussions](https://github.com/your-org/iagpm-genai/discussions) or [email](mailto:iagpm-genai@example.com)*
+Questions or feedback? Reach out via [GitHub Discussions](https://github.com/your-org/iagpm-genai/discussions) or [email](mailto:iagpm-genai@example.com).
 
 ---
 
-**Last Updated**: January 15, 2025 | **Version**: 1.0.0 | **License**: CC BY-SA 4.0
-
-</div>
+_Last Updated: January 15, 2025 · Version: 1.0.0 · License: CC BY-SA 4.0_

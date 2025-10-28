@@ -2,8 +2,8 @@
 
 ## Overview
 
-**Time Commitment:** 30 days  
-**Audience:** AI governance leads, PMO, cross-functional teams  
+**Time Commitment:** 30 days
+**Audience:** AI governance leads, PMO, cross-functional teams
 **Outcome:** Operational governance framework with initial policies, processes, and pilot project
 
 This guide provides a practical 30-day sprint to establish minimum viable AI governance. It's designed for organizations that need to move quickly while building a foundation for long-term governance maturity.
@@ -441,23 +441,23 @@ Track these metrics to measure governance effectiveness:
 ## Common Pitfalls and Solutions
 
 ### Pitfall: Analysis Paralysis
-**Symptom:** Team spends all 30 days drafting policies without operationalizing  
+**Symptom:** Team spends all 30 days drafting policies without operationalizing
 **Solution:** Use 80/20 rule—aim for "good enough" policies; iterate based on pilot learnings
 
 ### Pitfall: Lack of Executive Engagement
-**Symptom:** Sponsor delegates without staying involved; decisions stall  
+**Symptom:** Sponsor delegates without staying involved; decisions stall
 **Solution:** Schedule brief weekly sponsor check-ins; escalate blockers immediately
 
 ### Pitfall: Scope Creep
-**Symptom:** Team tries to solve every AI challenge in month 1  
+**Symptom:** Team tries to solve every AI challenge in month 1
 **Solution:** Focus on minimum viable governance; maintain "parking lot" for future enhancements
 
 ### Pitfall: IT-Only Governance
-**Symptom:** Business units bypass governance as "IT bureaucracy"  
+**Symptom:** Business units bypass governance as "IT bureaucracy"
 **Solution:** Ensure business representation on committee; communicate business value, not just compliance
 
 ### Pitfall: Tool-First Thinking
-**Symptom:** Governance blocked waiting for perfect MLOps/monitoring platform  
+**Symptom:** Governance blocked waiting for perfect MLOps/monitoring platform
 **Solution:** Start with spreadsheets and manual processes; automate incrementally
 
 ---
@@ -533,6 +533,6 @@ Once minimum viable governance is operational:
 
 ---
 
-**Last Updated:** October 15, 2025  
-**Version:** 1.0.0  
-**License:** CC BY-SA 4.0
+**Last Updated:** October 15, 2025
+**Version:** 1.0.0
+**License:** MIT License
