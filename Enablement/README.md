@@ -192,28 +192,6 @@ Track these metrics to measure enablement effectiveness:
 
 ---
 
-## 🤝 Contributing
-
-Have enablement materials to share?
-
-- ✅ **Case studies** from your implementations
-- ✅ **Training modules** for specialized roles
-- ✅ **Workshop facilitation guides** and exercises
-- ✅ **Lessons learned** and improvement suggestions
-
-See [main Contributing guide](../README.md#-contributing) for submission process.
-
----
-
-## 💬 Support
-
-**Questions about enablement?**
-
-- 💬 [GitHub Discussions](https://github.com/SPRIME01/IAGPM-GenAI-Handbook/discussions)
-- 📧 Enablement-specific inquiries: Tag with `enablement` label
-
----
-
 **Ready to enable your organization?** Start with the [📅 30-Day Governed Speed Plan](./governed_speed_30_day_plan.md)!
 
 ---

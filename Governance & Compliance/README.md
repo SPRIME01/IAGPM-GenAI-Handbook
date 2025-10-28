@@ -296,28 +296,6 @@ Track your progress across five levels:
 
 ---
 
-## 🤝 Contributing
-
-Have governance frameworks or compliance artifacts to share?
-
-- ✅ **Regulatory interpretations** and guidance
-- ✅ **Risk assessment templates** tested in production
-- ✅ **Incident case studies** and lessons learned
-- ✅ **KPI definitions** and measurement approaches
-
-See [main Contributing guide](../README.md#-contributing) for submission process.
-
----
-
-## 💬 Support
-
-**Questions about governance or compliance?**
-
-- 💬 [GitHub Discussions](https://github.com/SPRIME01/IAGPM-GenAI-Handbook/discussions)
-- 📧 Compliance inquiries: Tag with `governance` or `compliance` label
-
----
-
 **Ready to build bulletproof governance?** Start with the [⚖️ Balanced Scorecard](./balanced_scorecard_responsible_ai.md)!
 
 ---

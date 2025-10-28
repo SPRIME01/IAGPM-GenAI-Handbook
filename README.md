@@ -20,11 +20,8 @@
 - [🔧 How to Use This System](#-how-to-use-this-system)
 - [⚙️ Adoption & Implementation](#️-adoption--implementation)
 - [🧩 Framework Alignment](#-framework-alignment)
-- [🤝 Contributing](#-contributing)
-- [💬 Support & Resources](#-support--resources)
 - [📄 License & Usage](#-license--usage)
 - [🙏 Acknowledgments](#-acknowledgments)
-- [🗓️ Roadmap](#️-roadmap)
 - [❓ FAQ](#-faq)
 - [👨‍💼 About the Author](#-about-the-author)
 
@@ -571,103 +568,30 @@ flowchart TD
 
 ---
 
-## 🤝 Contributing
-
-This handbook improves through community input. We welcome contributions from practitioners, researchers, and organizations implementing GenAI governance.
-
-### 📝 How to Contribute
-
-#### 💡 Content Contributions
-
-- **Improvements**: Clarifications, corrections, additional examples
-- **New sections**: Emerging practices, regulatory updates, case studies
-- **Templates**: Tested artifacts from your implementations
-
-**Process**:
-
-1. Review [Contribution Guidelines](CONTRIBUTING.md)
-2. Check existing issues/discussions for related work
-3. Submit pull request with clear description and rationale
-4. Await review from maintainers (typically 5-7 business days)
-
-#### 💬 Feedback & Suggestions
-
-- **Report issues**: Outdated content, broken links, unclear guidance
-- **Request topics**: Gaps in coverage, desired deep-dives
-- **Share experiences**: Implementation learnings, case studies
-
-**Channels**:
-
-- GitHub Issues for bugs and content gaps
-- GitHub Discussions for questions and ideas
-- Email: [iagpm-genai@example.com](mailto:iagpm-genai@example.com)
-
-### ✅ Content Standards
-
-All contributions must meet:
-
-- ✅ **Accuracy**: Fact-checked, cited where appropriate
-- ✅ **Clarity**: Accessible to target audience, jargon explained
-- ✅ **Actionability**: Practical, implementable guidance
-- ✅ **Objectivity**: Vendor-neutral, balanced perspectives
-- ✅ **Currency**: Relevant to current state of GenAI landscape
-
-See [Style Guide](STYLE_GUIDE.md) for formatting and tone requirements.
-
-### 🏆 Recognition
-
-Contributors are acknowledged in:
-
-- Handbook credits section
-- GitHub contributor log
-- Annual thank-you in release notes
-
-Significant contributions may earn co-authorship on specific chapters.
-
----
-
-## 💬 Support & Resources
-
-### 🆘 Getting Help
-
-- 📖 **Documentation**: Full handbook content in `/docs`
-- 💬 **Community Forum**: [GitHub Discussions](https://github.com/your-org/iagpm-genai/discussions)
-- 📧 **Direct Support**: [iagpm-genai@example.com](mailto:iagpm-genai@example.com)
-- ⏰ **Office Hours**: First Tuesday monthly, 2-3 PM EST ([Calendar](https://calendar.example.com))
-
-### 🔗 Additional Resources
-
-- 🔗 **Companion Tools**: [IAGPM GenAI Toolkit](https://toolkit.example.com) - Risk calculators, policy generators
-- 📊 **Template Library**: [Downloadable artifacts](https://templates.example.com)
-- 🎓 **Training Program**: [Self-paced courses](https://training.example.com)
-- 📰 **Newsletter**: Monthly updates on GenAI governance ([Subscribe](https://newsletter.example.com))
-
-### 🔄 Handbook Maintenance
-
-**Current Version**: 1.0.0 (Released: January 2025)
-**Last Updated**: January 15, 2025
-**Next Review**: April 2025
-
-**Update Cadence**:
-
-- **Quarterly reviews**: Content refresh, new regulations, emerging practices
-- **Annual major release**: Structural updates, new chapters, case study additions
-- **Ad-hoc updates**: Critical regulatory changes, significant security advisories
-
-**Maintainers**:
-
-- Lead: [Name], AI Governance Practice Lead
-- Contributors: [List of core team members]
-
-**Feedback Loop**: Submit suggestions via GitHub Issues; maintainers triage monthly.
-
----
-
 ## 📄 License & Usage
 
 ### 📜 License
 
-This handbook is released under [Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)](https://creativecommons.org/licenses/by-sa/4.0/).
+MIT License
+
+Copyright (c) 2025 Samuel Prime
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this handbook and associated documentation files (the "Handbook"), to deal
+in the Handbook without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Handbook, and to permit persons to whom the Handbook is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Handbook.
+
+THE HANDBOOK IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE HANDBOOK OR THE USE OR OTHER DEALINGS IN THE
+HANDBOOK.
 
 **You are free to**:
 
@@ -710,33 +634,6 @@ This handbook reflects the collective wisdom of:
 - OECD AI Principles
 - Partnership on AI resources
 - Industry-specific frameworks (FDA AI/ML guidance, FS-ISAC AI working group)
-
----
-
-## 🗓️ Roadmap
-
-### 🎯 Upcoming Additions (v1.1 - Q2 2025)
-
-- [ ] Industry-specific playbooks (healthcare, financial services, government)
-- [ ] GenAI procurement and vendor management chapter
-- [ ] Enhanced case study library with ROI data
-- [ ] Interactive decision trees for policy customization
-- [ ] Video walkthroughs of key frameworks
-
-### 🔮 Long-term Vision (2025-2026)
-
-- [ ] Certification program for GenAI governance practitioners
-- [ ] Community-contributed template exchange
-- [ ] Integration guides for popular governance tools
-- [ ] Multi-language translations (Spanish, French, German, Mandarin)
-- [ ] Research partnership for continuous evidence base
-
-### 🗳️ How to Influence Roadmap
-
-- Vote on feature requests in GitHub Discussions
-- Submit proposals for new content areas
-- Volunteer to lead new chapter development
-- Sponsor specific roadmap items
 
 ---
 

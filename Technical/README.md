@@ -348,28 +348,6 @@ policies:
 
 ---
 
-## 🤝 Contributing
-
-Have technical implementations or architecture patterns to share?
-
-- ✅ **Reference implementations** of LLMOps patterns
-- ✅ **Policy-as-code examples** for specific use cases
-- ✅ **Infrastructure-as-code** templates (Terraform, CloudFormation)
-- ✅ **Integration guides** for specific tools and platforms
-
-See [main Contributing guide](../README.md#-contributing) for submission process.
-
----
-
-## 💬 Support
-
-**Technical questions or implementation issues?**
-
-- 💬 [GitHub Discussions](https://github.com/SPRIME01/IAGPM-GenAI-Handbook/discussions)
-- 📧 Technical inquiries: Tag with `technical` or `architecture` label
-
----
-
 **Ready to build production-grade AI?** Start with the [🏗️ LLMOps Reference Runbook](./llmops_reference_runbook.md)!
 
 ---
