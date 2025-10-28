@@ -608,7 +608,7 @@ HANDBOOK.
 
 When using this handbook, please cite as:
 
-> IAGPM GenAI Handbook (v1.0.0). Retrieved from <https://github.com/SPRIME01/iagpm-genai>
+> IAGPM GenAI Handbook (v1.0.0). Retrieved from <https://github.com/SPRIME01/IAGPM-GenAI-Handbook>
 
 ### 💼 Commercial Use
 
@@ -697,7 +697,6 @@ I design frameworks that make AI **trustworthy, compliant, and high‑velocity.*
 
 - 📋 Start with [Executive Summary](Executive_Summary.md)
 - ⚡ Jump into [Quick Start Guide](Quick_Start_Guide.md)
-- 💬 Questions? Visit [GitHub Discussions](https://github.com/SPRIME01/IAGPM-GenAI-Handbook/discussions)
 
 > _This repository is both a live portfolio and a deployable Responsible AI operating system. It demonstrates how governance, compliance, and velocity can coexist._
 
