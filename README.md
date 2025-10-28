@@ -1,29 +1,58 @@
-# IAGPM GenAI Handbook
+# 🎯 Integrated AI Governance & Project Management System (IAGPM‑GenAI)
 
-## A Comprehensive Guide to Generative AI Governance, Practices, and Management
-
-> Empowering organizations to harness GenAI responsibly through structured frameworks, practical guidance, and proven methodologies.
-
----
-
-## Table of Contents
-
-- [What This Handbook Addresses](#what-this-handbook-addresses)
-- [Who This Is For](#who-this-is-for)
-- [Quick Navigation](#quick-navigation)
-- [Handbook Structure](#handbook-structure)
-- [Getting Started by Role](#getting-started-by-role)
-- [Adoption & Implementation](#adoption--implementation)
-- [Contributing](#contributing)
-- [Support & Resources](#support--resources)
-- [License & Usage](#license--usage)
-- [Acknowledgments](#acknowledgments)
-- [Roadmap](#roadmap)
-- [FAQ](#faq)
+> **A complete operational framework for Responsible AI, LLMOps, and AI Transformation**
+>
+> _Empowering organizations to harness GenAI responsibly through structured frameworks, practical guidance, and proven methodologies._
+>
+> **Author**: Samuel Prime | 2025 | MIT License
 
 ---
 
-## What This Handbook Addresses
+## 📑 Table of Contents
+
+- [📘 Overview](#-overview)
+- [🎯 What This Handbook Addresses](#-what-this-handbook-addresses)
+- [👥 Who This Is For](#-who-this-is-for)
+- [🗺️ Repository Navigation](#️-repository-navigation)
+- [🧭 Quick Navigation](#-quick-navigation)
+- [📚 Handbook Structure](#-handbook-structure)
+- [🚀 Getting Started by Role](#-getting-started-by-role)
+- [🔧 How to Use This System](#-how-to-use-this-system)
+- [⚙️ Adoption & Implementation](#️-adoption--implementation)
+- [🧩 Framework Alignment](#-framework-alignment)
+- [🤝 Contributing](#-contributing)
+- [💬 Support & Resources](#-support--resources)
+- [📄 License & Usage](#-license--usage)
+- [🙏 Acknowledgments](#-acknowledgments)
+- [🗓️ Roadmap](#️-roadmap)
+- [❓ FAQ](#-faq)
+- [👨‍💼 About the Author](#-about-the-author)
+
+---
+
+## 📘 Overview
+
+This repository serves as a **portfolio and implementation reference** for the Integrated AI Governance & Project Management System (IAGPM‑GenAI). It unifies **project management**, **AI governance**, and **responsible AI operations** into one deployable framework.
+
+### 🔗 Framework Synthesis
+
+The system synthesizes:
+
+- **CPMAI+E** – Cognitive Project Management for AI + Ethical alignment
+- **NIST AI RMF** – Risk‑based trustworthy AI management
+- **ISO/IEC 42001:2024** – AI Management System (AIMS) standard
+- **EU AI Act** – Regulatory compliance framework
+- **The Fifth Discipline** – Systems thinking for adaptive learning organizations
+
+### 🎯 Core Philosophy
+
+Use this repo to explore **governed speed**: delivering GenAI safely, efficiently, and in compliance.
+
+> _This repository is both a live portfolio and a deployable Responsible AI operating system. It demonstrates how governance, compliance, and velocity can coexist._
+
+---
+
+## 🎯 What This Handbook Addresses
 
 ### The Challenge
 
@@ -56,7 +85,7 @@ This handbook provides a comprehensive, actionable framework covering:
 
 ---
 
-## Who This Is For
+## 👥 Who This Is For
 
 This handbook serves multiple stakeholder groups:
 
@@ -72,16 +101,78 @@ This handbook serves multiple stakeholder groups:
 
 ---
 
-## Quick Navigation
+## 🗺️ Repository Navigation
 
-### By Time Available
+### 📄 Core Framework Documents (Root Directory)
 
-- **⏱️ 5 minutes**: Read [Executive Summary](Executive_Summary.md) for high-level overview
-- **⏱️ 30 minutes**: Review [Quick Start Guide](Quick_Start_Guide.md) + your role-specific section
-- **⏱️ 2 hours**: Deep dive into [Handbook §2.2-2.3](Handbook.md#22-roles--accountability) (Governance Framework and Risk Management)
-- **📚 Full handbook**: ~8-10 hours of comprehensive reading
+| Document | 📖 Description |
+|----------|---------------|
+| [📋 Executive_Summary.md](./Executive_Summary.md) | Overview of system value, scope, and context |
+| [📘 Handbook.md](./Handbook.md) | Comprehensive operating manual for the integrated framework |
+| [🎓 Tutorial.md](./Tutorial.md) | Step‑by‑step onboarding and walkthrough examples |
+| [🔧 Howto.md](./Howto.md) | Problem‑oriented guides for applying specific components |
+| [📚 Reference.md](./Reference.md) | Full component catalog, task tables, and quick‑lookups |
+| [⚡ Quick_Start_Guide.md](./Quick_Start_Guide.md) | Rapid setup path to deploy the system in under an hour |
+| [💡 Explanation.md](./Explanation.md) | Conceptual rationale and architecture synthesis narrative |
 
-### By Information Need
+---
+
+### 🧩 Technical
+
+**Operational blueprints and engineering templates**
+
+| File | 📖 Description |
+|------|---------------|
+| [🏗️ llmops_reference_runbook.md](./Technical/llmops_reference_runbook.md) | End‑to‑end LLMOps architecture + operational SOP |
+| [📜 policy_as_code_starter.md](./Technical/policy_as_code_starter.md) | YAML policy rules + evaluation matrix for automated governance |
+| [🇪🇺 eu_ai_act_readiness.md](./Technical/eu_ai_act_readiness.md) | Risk‑tier classification & evidence pack preparation |
+| [📊 iso_42001_aims_scope_context.md](./Technical/iso_42001_aims_scope_context.md) | Define AIMS scope, context, and stakeholder expectations |
+| [🔄 nist_cpmai_crosswalk.md](./Technical/nist_cpmai_crosswalk.md) | NIST AI RMF ↔ CPMAI+E mapping for aligned governance |
+| [🃏 model_system_card_templates.md](./Technical/model_system_card_templates.md) | Ready‑to‑use model & system card templates with diagram |
+| [📂 README.md](./Technical/README.md) | Local directory index and usage guidance |
+
+---
+
+### 🛡️ Governance & Compliance
+
+**Governance playbooks, risk management, and compliance automation**
+
+| File | 📖 Description |
+|------|---------------|
+| [🔍 dpia_tra_data_governance_pack.md](./Governance%20%26%20Compliance/dpia_tra_data_governance_pack.md) | Combined DPIA & Technical Risk Assessment workflow |
+| [🚨 incident_response_rollback_playbook.md](./Governance%20%26%20Compliance/incident_response_rollback_playbook.md) | Structured plan for incident containment and rollback |
+| [🤝 third_party_llm_vendor_due_diligence.md](./Governance%20%26%20Compliance/third_party_llm_vendor_due_diligence.md) | Vendor evaluation checklist for Responsible AI maturity |
+| [📊 executive_kpi_dashboard_spec.md](./Governance%20%26%20Compliance/executive_kpi_dashboard_spec.md) | Unified view of performance, risk, and trust metrics |
+| [🗺️ eu_ai_act_risk_tier_nist_mapper.md](./Governance%20%26%20Compliance/eu_ai_act_risk_tier_nist_mapper.md) | Dual‑framework mapping for audit alignment |
+| [⚖️ balanced_scorecard_responsible_ai.md](./Governance%20%26%20Compliance/balanced_scorecard_responsible_ai.md) | Enterprise KPI framework for Responsible AI adoption |
+| [📂 README.md](./Governance%20%26%20Compliance/README.md) | Local directory index and compliance roadmap |
+
+---
+
+### 🧠 Enablement
+
+**Operational guides for adoption, training, and transformation**
+
+| File | 📖 Description |
+|------|---------------|
+| [📝 case_study_template.md](./Enablement/case_study_template.md) | Structured before/after/control case study format |
+| [🚀 push_button_kit_readme.md](./Enablement/push_button_kit_readme.md) | Starter repo for the 30‑Day Governed Speed Kit |
+| [🎓 enablement_curriculum.md](./Enablement/enablement_curriculum.md) | Team and executive learning modules & certification path |
+| [📅 governed_speed_30_day_plan.md](./Enablement/governed_speed_30_day_plan.md) | 30‑day rollout plan for Responsible AI governance |
+| [📂 README.md](./Enablement/README.md) | Local directory index and enablement overview |
+
+---
+
+## 🧭 Quick Navigation
+
+### ⏱️ By Time Available
+
+- **5 minutes**: Read [📋 Executive Summary](Executive_Summary.md) for high-level overview
+- **30 minutes**: Review [⚡ Quick Start Guide](Quick_Start_Guide.md) + your role-specific section
+- **2 hours**: Deep dive into [📘 Handbook §2.2-2.3](Handbook.md#22-roles--accountability) (Governance Framework and Risk Management)
+- **Full handbook**: ~8-10 hours of comprehensive reading
+
+### 🎯 By Information Need
 
 - 🚀 **Getting Started**: [Executive Summary](Executive_Summary.md) → [Quick Start Guide](Quick_Start_Guide.md) → [Tutorial §1](Tutorial.md#1-quickstart-overview)
 - 📐 **Setting Up Governance**: [Handbook §2.2](Handbook.md#22-roles--accountability) → [Handbook §2.4](Handbook.md#24-templates--samples) → [Quick Start Week 1](Quick_Start_Guide.md#week-1-foundation-days-1-7)
@@ -89,19 +180,38 @@ This handbook serves multiple stakeholder groups:
 - 🛠️ **Implementing Practices**: [Tutorial §2.4-2.7](Tutorial.md#24-prepare-data) → [How-To §3](Howto.md#3-deploying-generative-ai-responsibly) → [Reference §1](Reference.md#1-component-catalog)
 - 📏 **Ensuring Compliance**: [Reference §2.1](Reference.md#21-regulations--frameworks-by-industry) → [Handbook §2.3.1](Handbook.md#231-business-understanding--governing) → [How-To §4](Howto.md#4-aligning-with-federal-contracting-requirements)
 
-### Most Accessed Sections
+### 🌟 Most Accessed Sections
 
-1. [Risk Assessment Template](Handbook.md#242-risk-management-table) 📊
-2. [Governance Committee Roles](Handbook.md#22-roles--accountability) 🏛️
-3. [Data Governance Guidelines](Handbook.md#236-cross-cutting-domains) 🔒
-4. [EU AI Act Classification](Handbook.md#1--framework-ingestion--mapping) ✅
-5. [Incident Response Procedures](Handbook.md#235-operationalization--management) 🚨
+1. 📊 [Risk Assessment Template](Handbook.md#242-risk-management-table)
+2. 🏛️ [Governance Committee Roles](Handbook.md#22-roles--accountability)
+3. 🔒 [Data Governance Guidelines](Handbook.md#236-cross-cutting-domains)
+4. ✅ [EU AI Act Classification](Handbook.md#1--framework-ingestion--mapping)
+5. 🚨 [Incident Response Procedures](Handbook.md#235-operationalization--management)
 
 ---
 
-## Handbook Structure
+## � How to Use This System
 
-### Part 1: Foundations (Chapters 1-3)
+### 📖 Recommended Learning Path
+
+1. **Start with** the [📋 Executive_Summary.md](./Executive_Summary.md) and [⚡ Quick_Start_Guide.md](./Quick_Start_Guide.md)
+2. **Build technical fluency** using the [🧩 Technical](./Technical) folder
+3. **Implement governance** with the [🛡️ Governance & Compliance](./Governance%20%26%20Compliance) resources
+4. **Enable adoption** using [🧠 Enablement](./Enablement) materials
+5. **Demonstrate results** with real or simulated case studies
+
+### 🎯 By Use Case
+
+- **Launching a new AI initiative**: Quick Start → Governance Setup → Risk Assessment
+- **Achieving compliance**: Regulatory Reference → Policy Templates → Audit Checklist
+- **Building technical capability**: LLMOps Runbook → Model Cards → Deployment Guides
+- **Training your team**: Enablement Curriculum → Case Studies → Hands-on Tutorial
+
+---
+
+## 📚 Handbook Structure
+
+### 📖 Part 1: Foundations (Chapters 1-3)
 
 **What**: Core concepts, principles, and framework overview
 **Who**: All audiences—essential baseline knowledge
@@ -111,7 +221,7 @@ This handbook serves multiple stakeholder groups:
 - **Ch 2: [Unified Operational System](Handbook.md#2--unified-operational-handbook)** - The IAGPM methodology architecture
 - **Ch 3: [Implementation Roadmap](Handbook.md#3--implementation-roadmap)** - Practical adoption phases
 
-### Part 2: Governance (Chapters 4-7)
+### 🏛️ Part 2: Governance (Chapters 4-7)
 
 **What**: Organizational structures, policies, and decision-making frameworks
 **Who**: Executives, program managers, compliance officers
@@ -122,7 +232,7 @@ This handbook serves multiple stakeholder groups:
 - **Ch 6: [Data Understanding & Mapping](Handbook.md#232-data-understanding--mapping)** - Stakeholder mapping, risk identification
 - **Ch 7: [Cross-Cutting Functions](Handbook.md#236-cross-cutting-domains)** - Data governance, trustworthy AI
 
-### Part 3: Risk Management (Chapters 8-11)
+### ⚠️ Part 3: Risk Management (Chapters 8-11)
 
 **What**: Identifying, assessing, and mitigating GenAI-specific risks
 **Who**: Security teams, compliance officers, risk managers
@@ -133,7 +243,7 @@ This handbook serves multiple stakeholder groups:
 - **Ch 10: [Risk Templates](Handbook.md#242-risk-management-table)** - Risk registers and mitigation strategies
 - **Ch 11: [Incident Management](Handbook.md#235-operationalization--management)** - Response protocols, lessons learned
 
-### Part 4: Practices (Chapters 12-16)
+### 🛠️ Part 4: Practices (Chapters 12-16)
 
 **What**: Day-to-day operational guidance for AI teams
 **Who**: Engineers, product managers, data scientists
@@ -145,7 +255,7 @@ This handbook serves multiple stakeholder groups:
 - **Ch 15: [Testing & Assurance](Tutorial.md#26-evaluate--decide)** - Go/no-go reviews, safety testing
 - **Ch 16: [Operationalization](Handbook.md#235-operationalization--management)** - Deployment, monitoring, maintenance
 
-### Part 5: Management (Chapters 17-20)
+### 📊 Part 5: Management (Chapters 17-20)
 
 **What**: Strategic program management and continuous improvement
 **Who**: Program managers, executives, product leaders
@@ -156,7 +266,7 @@ This handbook serves multiple stakeholder groups:
 - **Ch 19: [Success Metrics](Quick_Start_Guide.md#success-metrics)** - Measuring governance effectiveness
 - **Ch 20: [Continuous Improvement](Handbook.md#236-cross-cutting-domains)** - Learning and evolution
 
-### Appendices
+### 📑 Appendices
 
 - **A: [Templates & Checklists](Handbook.md#24-templates--samples)** - Ready-to-use artifacts
 - **B: [Tutorial & Case Studies](Tutorial.md#3-example-project-automating-clinical-trial-summaries)** - Real-world implementation examples
@@ -166,7 +276,7 @@ This handbook serves multiple stakeholder groups:
 
 ---
 
-## Getting Started by Role
+## 🚀 Getting Started by Role
 
 <details>
 
@@ -348,9 +458,9 @@ This handbook serves multiple stakeholder groups:
 
 ---
 
-## Adoption & Implementation
+## ⚙️ Adoption & Implementation
 
-### Phase 1: Foundation (Weeks 1-4)
+### 🎬 Phase 1: Foundation (Weeks 1-4)
 
 **Goal**: Establish baseline understanding and leadership buy-in
 
@@ -361,7 +471,7 @@ This handbook serves multiple stakeholder groups:
 
 **Deliverables**: Governance charter, committee roster, stakeholder map
 
-### Phase 2: Policy Development (Weeks 5-10)
+### 📝 Phase 2: Policy Development (Weeks 5-10)
 
 **Goal**: Create core policies and procedures
 
@@ -371,7 +481,7 @@ This handbook serves multiple stakeholder groups:
 
 **Deliverables**: Approved AI usage policies, acceptable use guidelines, data handling procedures
 
-### Phase 3: Implementation (Weeks 11-16)
+### 🚀 Phase 3: Implementation (Weeks 11-16)
 
 **Goal**: Deploy governance mechanisms and controls
 
@@ -381,7 +491,7 @@ This handbook serves multiple stakeholder groups:
 
 **Deliverables**: Operational intake process, deployed controls, pilot learnings
 
-### Phase 4: Operationalization (Weeks 17-24)
+### 📈 Phase 4: Operationalization (Weeks 17-24)
 
 **Goal**: Scale governance across organization
 
@@ -391,30 +501,30 @@ This handbook serves multiple stakeholder groups:
 
 **Deliverables**: Scaled governance program, metrics dashboard, improvement backlog
 
-### Customization Guidance
+### 🎯 Customization Guidance
 
-#### For Small Organizations (&lt;100 employees)
+#### 🏢 For Small Organizations (&lt;100 employees)
 
 - **Streamline governance**: Single AI lead vs. full committee (see Ch 4.5)
 - **Lightweight policies**: Use starter templates (Appendix A.3.1)
 - **Focus on high-risk use cases**: Prioritize customer-facing and sensitive data scenarios
 - **Leverage third-party tools**: Adopt vendor solutions where possible
 
-#### For Enterprise Organizations (&gt;1000 employees)
+#### 🏭 For Enterprise Organizations (&gt;1000 employees)
 
 - **Federated governance**: Hub-and-spoke model (Ch 4.3)
 - **Comprehensive policies**: Full policy suite with role-based variations
 - **Dedicated resources**: AI governance team, tools, and budget
 - **Integration with existing frameworks**: Align with IT governance, risk management, compliance programs
 
-#### For Regulated Industries (Finance, Healthcare, Government)
+#### 🏥 For Regulated Industries (Finance, Healthcare, Government)
 
 - **Heightened rigor**: Start with strictest controls, relax as appropriate
 - **Sector-specific guidance**: See regulatory appendix for industry considerations
 - **Documentation emphasis**: Enhanced record-keeping and audit trails
 - **Regular external review**: Engage auditors and regulators early
 
-### Common Pitfalls to Avoid
+### ⚠️ Common Pitfalls to Avoid
 
 | ❌ Pitfall | ✅ Better Approach |
 |-----------|-------------------|
@@ -427,13 +537,47 @@ This handbook serves multiple stakeholder groups:
 
 ---
 
-## Contributing
+## 🧩 Framework Alignment
+
+### 🔄 Integration Architecture
+
+This framework integrates multiple industry-leading standards and methodologies into a cohesive system:
+
+```mermaid
+flowchart TD
+  A[CPMAI+E Lifecycle] --> B[NIST AI RMF]
+  B --> C[ISO 42001 AIMS]
+  C --> D[EU AI Act Compliance]
+  D --> E[Enablement & Continuous Learning]
+  E --> A
+```
+
+### 📊 Framework Components
+
+| Framework | Purpose | Key Contribution |
+|-----------|---------|------------------|
+| 🔄 **CPMAI+E** | Project methodology for AI initiatives | Lifecycle phases, task structure, ethical integration |
+| 🛡️ **NIST AI RMF** | Risk management framework | Govern, Map, Measure, Manage functions |
+| ⚖️ **ISO 42001:2024** | AI Management System standard | Organizational governance, processes, controls |
+| 🇪🇺 **EU AI Act** | Regulatory compliance | Risk classification, prohibited practices, conformity |
+| 🌀 **Fifth Discipline** | Learning organization principles | Systems thinking, continuous improvement |
+
+### 🎯 Unified Value Proposition
+
+- **For Practitioners**: End-to-end operational playbook from ideation to monitoring
+- **For Executives**: Risk-aware governance with measurable business outcomes
+- **For Regulators**: Demonstrable compliance with audit trails
+- **For Organizations**: Velocity without sacrificing responsibility
+
+---
+
+## 🤝 Contributing
 
 This handbook improves through community input. We welcome contributions from practitioners, researchers, and organizations implementing GenAI governance.
 
-### How to Contribute
+### 📝 How to Contribute
 
-#### Content Contributions
+#### 💡 Content Contributions
 
 - **Improvements**: Clarifications, corrections, additional examples
 - **New sections**: Emerging practices, regulatory updates, case studies
@@ -446,7 +590,7 @@ This handbook improves through community input. We welcome contributions from pr
 3. Submit pull request with clear description and rationale
 4. Await review from maintainers (typically 5-7 business days)
 
-#### Feedback & Suggestions
+#### 💬 Feedback & Suggestions
 
 - **Report issues**: Outdated content, broken links, unclear guidance
 - **Request topics**: Gaps in coverage, desired deep-dives
@@ -458,7 +602,7 @@ This handbook improves through community input. We welcome contributions from pr
 - GitHub Discussions for questions and ideas
 - Email: [iagpm-genai@example.com](mailto:iagpm-genai@example.com)
 
-### Content Standards
+### ✅ Content Standards
 
 All contributions must meet:
 
@@ -470,7 +614,7 @@ All contributions must meet:
 
 See [Style Guide](STYLE_GUIDE.md) for formatting and tone requirements.
 
-### Recognition
+### 🏆 Recognition
 
 Contributors are acknowledged in:
 
@@ -482,23 +626,23 @@ Significant contributions may earn co-authorship on specific chapters.
 
 ---
 
-## Support & Resources
+## 💬 Support & Resources
 
-### Getting Help
+### 🆘 Getting Help
 
 - 📖 **Documentation**: Full handbook content in `/docs`
 - 💬 **Community Forum**: [GitHub Discussions](https://github.com/your-org/iagpm-genai/discussions)
 - 📧 **Direct Support**: [iagpm-genai@example.com](mailto:iagpm-genai@example.com)
 - ⏰ **Office Hours**: First Tuesday monthly, 2-3 PM EST ([Calendar](https://calendar.example.com))
 
-### Additional Resources
+### 🔗 Additional Resources
 
 - 🔗 **Companion Tools**: [IAGPM GenAI Toolkit](https://toolkit.example.com) - Risk calculators, policy generators
 - 📊 **Template Library**: [Downloadable artifacts](https://templates.example.com)
 - 🎓 **Training Program**: [Self-paced courses](https://training.example.com)
 - 📰 **Newsletter**: Monthly updates on GenAI governance ([Subscribe](https://newsletter.example.com))
 
-### Handbook Maintenance
+### 🔄 Handbook Maintenance
 
 **Current Version**: 1.0.0 (Released: January 2025)
 **Last Updated**: January 15, 2025
@@ -519,9 +663,9 @@ Significant contributions may earn co-authorship on specific chapters.
 
 ---
 
-## License & Usage
+## 📄 License & Usage
 
-### License
+### 📜 License
 
 This handbook is released under [Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)](https://creativecommons.org/licenses/by-sa/4.0/).
 
@@ -536,21 +680,21 @@ This handbook is released under [Creative Commons Attribution-ShareAlike 4.0 Int
 - 🔄 ShareAlike: Distribute adaptations under the same license
 - 🚫 No additional restrictions: Cannot apply legal terms or technological measures that restrict others
 
-### Attribution
+### 📝 Attribution
 
 When using this handbook, please cite as:
 
 > IAGPM GenAI Handbook (v1.0.0). Retrieved from <https://github.com/SPRIME01/iagpm-genai>
 
-### Commercial Use
+### 💼 Commercial Use
 
 Organizations may use this handbook internally and with clients. We encourage sharing improvements back to the community but do not require it for internal customizations.
 
 ---
 
-## Acknowledgments
+## 🙏 Acknowledgments
 
-### Contributors
+### 👥 Contributors
 
 This handbook reflects the collective wisdom of:
 
@@ -559,7 +703,7 @@ This handbook reflects the collective wisdom of:
 - **Legal and compliance experts** who ensured regulatory accuracy
 - **Early adopters** who piloted these practices and provided feedback
 
-### Inspiration & References
+### 📚 Inspiration & References
 
 - NIST AI Risk Management Framework
 - EU AI Act guidance and implementing regulations
@@ -569,9 +713,9 @@ This handbook reflects the collective wisdom of:
 
 ---
 
-## Roadmap
+## 🗓️ Roadmap
 
-### Upcoming Additions (v1.1 - Q2 2025)
+### 🎯 Upcoming Additions (v1.1 - Q2 2025)
 
 - [ ] Industry-specific playbooks (healthcare, financial services, government)
 - [ ] GenAI procurement and vendor management chapter
@@ -579,7 +723,7 @@ This handbook reflects the collective wisdom of:
 - [ ] Interactive decision trees for policy customization
 - [ ] Video walkthroughs of key frameworks
 
-### Long-term Vision (2025-2026)
+### 🔮 Long-term Vision (2025-2026)
 
 - [ ] Certification program for GenAI governance practitioners
 - [ ] Community-contributed template exchange
@@ -587,7 +731,7 @@ This handbook reflects the collective wisdom of:
 - [ ] Multi-language translations (Spanish, French, German, Mandarin)
 - [ ] Research partnership for continuous evidence base
 
-### How to Influence Roadmap
+### 🗳️ How to Influence Roadmap
 
 - Vote on feature requests in GitHub Discussions
 - Submit proposals for new content areas
@@ -596,7 +740,7 @@ This handbook reflects the collective wisdom of:
 
 ---
 
-## FAQ
+## ❓ FAQ
 
 <details>
 <summary><strong>Is this handbook applicable to all AI, or just GenAI?</strong></summary>
@@ -645,10 +789,38 @@ We provide **guidance aligned with major frameworks** (EU AI Act, NIST AI RMF, e
 
 ---
 
-**Ready to dive in?** Start with [Executive Summary](Executive_Summary.md) or [Quick Start Guide](Quick_Start_Guide.md).
+## 👨‍💼 About the Author
 
-Questions or feedback? Reach out via [GitHub Discussions](https://github.com/SPRIME01/iagpm-genai/discussions)
+**Samuel Prime** — AI Governance, Transformation & LLMOps Leader
+
+I design frameworks that make AI **trustworthy, compliant, and high‑velocity.**
+
+### 🎯 Expertise Areas
+
+- 🛡️ Responsible AI Governance
+- 🔧 LLMOps & AI Operations
+- ⚖️ ISO 42001 & AI Management Systems
+- 🇪🇺 EU AI Act Compliance
+- 📊 AI Risk Management & Assessment
+- 🤖 Governance Automation
+
+### 📬 Contact
+
+- 🌐 [LinkedIn](https://www.linkedin.com/in/iamsamprime/)
+- 📍 **Location**: Research Triangle Park (RTP), North Carolina / Remote
 
 ---
 
-_Last Updated: October 15, 2025 · Version: 1.0.0 · License: MIT_
+## 🚀 Ready to Get Started?
+
+**Quick Links:**
+
+- 📋 Start with [Executive Summary](Executive_Summary.md)
+- ⚡ Jump into [Quick Start Guide](Quick_Start_Guide.md)
+- 💬 Questions? Visit [GitHub Discussions](https://github.com/SPRIME01/IAGPM-GenAI-Handbook/discussions)
+
+> _This repository is both a live portfolio and a deployable Responsible AI operating system. It demonstrates how governance, compliance, and velocity can coexist._
+
+---
+
+**Last Updated**: October 28, 2025 | **Version**: 1.0.0 | **License**: MIT
