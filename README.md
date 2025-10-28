@@ -671,7 +671,7 @@ We provide **guidance aligned with major frameworks** (EU AI Act, NIST AI RMF, e
 
 ## 👨‍💼 About the Author
 
-**Samuel Prime** — AI Governance, Transformation & LLMOps Leader
+**Samuel Prime** — GenAI Program Manager | AI Governance & Transformation | LLMOps Leader
 
 I design frameworks that make AI **trustworthy, compliant, and high‑velocity.**
 
