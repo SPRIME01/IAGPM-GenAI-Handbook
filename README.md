@@ -654,13 +654,6 @@ Primarily **Generative AI** (LLMs, image generation, etc.). While many principle
 </details>
 
 <details>
-<summary><strong>How often is this handbook updated?</strong></summary>
-
-**Quarterly content reviews** for accuracy and currency. **Annual major releases** with new chapters and structural updates. Critical updates (e.g., major regulatory changes) published ad-hoc. Subscribe to release notes to stay informed.
-
-</details>
-
-<details>
 <summary><strong>Can I customize templates and policies for my organization?</strong></summary>
 
 **Absolutely**. Templates are starting points—adapt to your context, risk appetite, and culture. We encourage sharing generic versions of improvements back to the community.
@@ -671,16 +664,6 @@ Primarily **Generative AI** (LLMs, image generation, etc.). While many principle
 <summary><strong>Is this handbook compliant with [specific regulation]?</strong></summary>
 
 We provide **guidance aligned with major frameworks** (EU AI Act, NIST AI RMF, etc.), but **cannot guarantee compliance** for any specific jurisdiction or use case. Consult legal counsel to ensure your implementation meets applicable requirements.
-
-</details>
-
-<details>
-<summary><strong>How do I stay updated on changes?</strong></summary>
-
-- **Watch this repository** for release notifications
-- **Subscribe to newsletter** for curated updates
-- **Follow changelog** for detailed version history
-- **Join office hours** for direct updates from maintainers
 
 </details>
 
