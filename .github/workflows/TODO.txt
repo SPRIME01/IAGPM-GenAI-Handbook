@@ -1,0 +1,7 @@
+Notes
+
+The “Generate/Collect Eval Artifacts” step is a placeholder; wire in your real eval jobs.
+
+The workflow fails on quality/fairness/safety breaches. Drift only warns (per ADR-006).
+
+The RES endpoint is cluster-internal. If your CI runs outside cluster, expose RES via Ingress or run a job inside the cluster.

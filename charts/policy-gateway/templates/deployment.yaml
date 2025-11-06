@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "policy-gateway.fullname" . | default "policy-gateway-vllm" }}
+  labels:
+    app.kubernetes.io/name: policy-gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {{- toYaml .Values.targetApp.labels | nindent 6 }}
+  template:
+    metadata:
+      labels: {{- toYaml .Values.targetApp.labels | nindent 8 }}
+      annotations: {{- toYaml .Values.podAnnotations | nindent 8 }}
+    spec:
+      containers:
+        - name: vllm
+          image: ghcr.io/your-org/vllm:latest
+          ports:
+            - containerPort: {{ .Values.targetApp.vllmPort }}
+          env:
+            - name: VLLM_PORT
+              value: "{{ .Values.targetApp.vllmPort }}"
+          readinessProbe:
+            httpGet: { path: /health, port: {{ .Values.targetApp.vllmPort }} }
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          resources:
+            requests: { cpu: "1", memory: "2Gi" }
+            limits: { cpu: "4", memory: "8Gi" }
+        - name: policy-gateway
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.service.port }}
+          env:
+            - name: PAC_CONFIG
+              value: "{{ .Values.config.adrConfigPath }}"
+            - name: PAC_UPSTREAM_URL
+              value: "http://localhost:{{ .Values.targetApp.vllmPort }}"
+          volumeMounts:
+            - name: adr006
+              mountPath: {{ .Values.config.adrConfigMountPath }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: adr006
+          configMap:
+            name: {{ .Values.config.adrConfigCM }}

@@ -1,0 +1,38 @@
+image:
+  repository: ghcr.io/your-org/risk-evidence-service
+  tag: "v0.1.0"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8080
+
+storage:
+  size: 2Gi
+  className: ""   # set for your cluster if needed
+
+config:
+  adrConfigCM: adr-006-config
+  adrConfigKey: adr-006.embedded-governance.yaml
+  adrConfigMountPath: /config
+  adrConfigPath: /config/adr-006.embedded-governance.yaml
+
+ingress:
+  enabled: false
+  className: traefik
+  host: res.localdev
+  annotations: {}
+
+env:
+  STORAGE_BACKEND: filesystem
+  STORAGE_PATH: /evidence
+  INCIDENT_WEBHOOK_SECRET: res-secrets
+  INCIDENT_WEBHOOK_KEY: incidentWebhook
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 256Mi
+  limits:
+    cpu: "1"
+    memory: 512Mi

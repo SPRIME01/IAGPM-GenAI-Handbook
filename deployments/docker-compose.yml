@@ -1,0 +1,77 @@
+version: "3.9"
+services:
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    container_name: prometheus
+    volumes:
+      - ../observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports: [ "9090:9090" ]
+    networks: [ gs ]
+
+  grafana:
+    image: grafana/grafana:10.4.5
+    container_name: grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - ../observability/grafana/dashboards:/var/lib/grafana/dashboards
+      - ../observability/grafana/provisioning:/etc/grafana/provisioning
+    ports: [ "3000:3000" ]
+    depends_on: [ prometheus ]
+    networks: [ gs ]
+
+  pgvector:
+    image: ankane/pgvector:latest
+    container_name: pgvector
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=embeddings
+    ports: [ "5432:5432" ]
+    networks: [ gs ]
+
+  vllm-mock:
+    image: ghcr.io/williamjacksn/http-echo:latest
+    container_name: vllm-mock
+    command: ["-text", "{\"completion\":\"demo\"}"]
+    ports: [ "8000:5678" ]
+    networks: [ gs ]
+
+  policy-gateway:
+    build:
+      context: ../services/policy-gateway
+    environment:
+      - PAC_CONFIG=/config/adr-006.embedded-governance.yaml
+      - PAC_UPSTREAM_URL=http://vllm-mock:5678
+    volumes:
+      - ../policies/adr-006.embedded-governance.yaml:/config/adr-006.embedded-governance.yaml:ro
+    ports: [ "8081:8081" ]
+    depends_on: [ vllm-mock ]
+    networks: [ gs ]
+
+  res:
+    build:
+      context: ../services/risk-evidence-service
+    environment:
+      - STORAGE_PATH=/evidence
+      - PAC_CONFIG=/config/adr-006.embedded-governance.yaml
+    volumes:
+      - resdata:/evidence
+      - ../policies/adr-006.embedded-governance.yaml:/config/adr-006.embedded-governance.yaml:ro
+    ports: [ "8080:8080" ]
+    networks: [ gs ]
+
+  viewer:
+    image: python:3.11-slim
+    container_name: res-viewer
+    working_dir: /app
+    environment:
+      - RES_URL=http://res:8080
+    command: bash -lc "pip install -r requirements.txt && streamlit run app.py --server.port 8501 --server.address 0.0.0.0"
+    volumes:
+      - ../tools/res_viewer:/app
+    ports: [ "8501:8501" ]
+    depends_on: [ res ]
+    networks: [ gs ]
+
+networks: { gs: {} }
+volumes: { resdata: {} }

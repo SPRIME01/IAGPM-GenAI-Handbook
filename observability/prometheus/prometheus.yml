@@ -1,0 +1,12 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'res'
+    static_configs:
+      - targets: [ 'res:8080' ]
+  - job_name: 'policy-gateway'
+    static_configs:
+      - targets: [ 'policy-gateway:8081' ]
+  # mock exporters for demo metrics (optional)
+  # if you emit metrics from gateway to Prometheus directly, add here.

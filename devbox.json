@@ -1,0 +1,15 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/main/devbox.schema.json",
+  "packages": [
+    "just@latest",
+    "python@3.11",
+    "kubectl@latest",
+    "kubernetes-helm@latest",
+    "docker@latest",
+    "docker-compose@latest"
+  ],
+  "env": {
+    "PIP_DISABLE_PIP_VERSION_CHECK": "1",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  }
+}

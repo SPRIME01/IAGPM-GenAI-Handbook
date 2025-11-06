@@ -1,0 +1,211 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.config.adrConfigCM }}
+data:
+  {{ .Values.config.adrConfigKey }}: |
+    meta:
+  adr_id: "ADR-006"
+  title: "Embedded AI Governance Integration (EGA)"
+  version: "1.0"
+  status: "accepted"
+  date: "2025-11-05"
+  scope: "All LLM/ML services governed under IAGPM-GenAI"
+  repo_paths:
+    technical_dir: "Technical/"
+    governance_dir: "Governance & Compliance/"
+    enablement_dir: "Enablement/"
+
+frameworks:
+  cpmai_e:
+    phases:
+      - I: "Business Understanding"
+      - II: "Data Understanding"
+      - III: "Data Preparation"
+      - IV: "Model Development"
+      - V: "Evaluation"
+      - VI: "Operationalization"
+  nist_ai_rmf: ["Govern", "Map", "Measure", "Manage"]
+  iso_42001:
+    components: ["Context", "Leadership", "Planning", "Support", "Operation", "Performance", "Improvement"]
+  eu_ai_act:
+    risk_tiers: ["Prohibited", "High", "GPAI", "Limited", "Minimal"]
+
+ownership:
+  roles:
+    governance_lead: "name@org.com"
+    product_owner: "name@org.com"
+    risk_manager: "name@org.com"
+    ml_engineer: "name@org.com"
+    mlops_engineer: "name@org.com"
+    security_officer: "name@org.com"
+    dpo_privacy_officer: "name@org.com"
+  raci_examples:
+    model_release_gate:
+      responsible: ["mlops_engineer"]
+      accountable: ["governance_lead"]
+      consulted: ["risk_manager","security_officer","product_owner"]
+      informed: ["exec_sponsor","support_ops"]
+
+environment:
+  platform:
+    kubernetes: "k3s"
+    gitops: "Argo CD"
+    inference: "vLLM"
+    vector_store: "PostgreSQL + pgvector"
+    observability:
+      metrics: "Prometheus"
+      dashboards: "Grafana"
+      logging: "Loki"
+  namespaces:
+    - "dev"
+    - "staging"
+    - "prod"
+
+classification:
+  eu_ai_act:
+    default: "Limited"
+    decision_tree_ref: "Governance & Compliance/EU_AI_Act_Risk_Tier_NIST_Mapper.md"
+    require_review_on_change: true
+  data_categories:
+    - personal
+    - sensitive
+    - non_personal
+  lawful_basis:
+    allowed: ["consent","contract","legal_obligation","legitimate_interest","public_task"]
+    require_evidence: true
+
+policy_as_code:
+  rules:
+    - id: "pii_block_prompt"
+      description: "Block prompts with PII unless lawful basis recorded"
+      when: "prompt.contains_pii == true and lawful_basis == false"
+      action: "block"
+      owner: "dpo_privacy_officer"
+    - id: "jailbreak_detector"
+      description: "Safe mode if jailbreak score > threshold"
+      when: "prompt.jailbreak_score > 0.8"
+      action: "safe_mode"
+      owner: "security_officer"
+    - id: "copyright_guard"
+      description: "Replace large verbatim 3P content with summary"
+      when: "output.verbatim_ratio > 0.2"
+      action: "summarize"
+      owner: "governance_lead"
+
+thresholds:
+  quality:
+    pass_at_5: { target: 0.82, block_below: true }
+  fairness:
+    subgroup_delta: { target_max: 0.05, block_above: true }
+  safety:
+    harmful_rate: { target_max: 0.005, block_above: true }
+  privacy:
+    reid_risk: { target_max: 0.001, block_above: true }
+  drift:
+    psi: { warn_at: 0.1, retrain_at: 0.2 }
+  latency:
+    p95_seconds: { target_max: 2.0 }
+  availability:
+    target: "99.5%"
+
+ci_cd_gates:
+  pre_merge:
+    - name: "eval_suite_quality"
+      script: "scripts/run_eval_quality.sh"
+      fail_if_below: "thresholds.quality.pass_at_5.target"
+    - name: "eval_suite_fairness"
+      script: "scripts/run_eval_fairness.sh"
+      fail_if_above: "thresholds.fairness.subgroup_delta.target_max"
+    - name: "safety_redteam"
+      script: "scripts/run_redteam.sh"
+      fail_if_above: "thresholds.safety.harmful_rate.target_max"
+    - name: "model_card_required"
+      script: "scripts/check_model_card.sh"
+      require_fields: ["purpose","data_sources","eval","fairness","safety","limitations","monitoring"]
+  pre_prod:
+    - name: "dpia_approved"
+      require_artifact: "Governance & Compliance/DPIA_TRA_Data_Governance_Pack.md"
+    - name: "risk_register_update"
+      require_artifact: "Governance & Compliance/Risk_Register.json"
+    - name: "governance_signoff"
+      approvers: ["governance_lead","product_owner"]
+  prod:
+    - name: "canary_release"
+      policy: "5% traffic, 15 min soak"
+    - name: "rollback_ready"
+      require_artifact: "Technical/LLMOps_Reference_Architecture_Runbook.md#Rollback"
+
+evidence_artifacts:
+  model_card: "Technical/Model_System_Card_Templates.md"
+  system_card: "Technical/Model_System_Card_Templates.md"
+  dpia: "Governance & Compliance/DPIA_TRA_Data_Governance_Pack.md"
+  eval_pack: "Technical/Policy_as_Code_Starter_Pack.md#Evaluation-Matrix"
+  kpi_dashboard: "Governance & Compliance/Executive_KPI_Dashboard_Spec.md"
+  incident_playbook: "Governance & Compliance/Incident_Response_Rollback_Playbook.md"
+
+monitoring:
+  metrics:
+    - name: "answer_quality_pass_at_5"
+      source: "prometheus"
+      target: "thresholds.quality.pass_at_5.target"
+    - name: "harmful_output_rate"
+      source: "prometheus"
+      target_max: "thresholds.safety.harmful_rate.target_max"
+    - name: "fairness_subgroup_delta"
+      source: "prometheus"
+      target_max: "thresholds.fairness.subgroup_delta.target_max"
+    - name: "drift_psi"
+      source: "prometheus"
+      warn_at: "thresholds.drift.psi.warn_at"
+      retrain_at: "thresholds.drift.psi.retrain_at"
+  alerts:
+    - name: "sev1_privacy_or_safety"
+      condition: "harmful_output_rate > thresholds.safety.harmful_rate.target_max OR privacy_incident_detected == true"
+      action: ["page:oncall","traffic:safe_mode","initiate:incident_workflow"]
+    - name: "sev2_quality_regression"
+      condition: "answer_quality_pass_at_5 < thresholds.quality.pass_at_5.target * 0.95"
+      action: ["create:ticket","schedule:RCA_24h"]
+  dashboards:
+    grafana:
+      board: "AI-Governed-Speed"
+      panels: ["Quality","Safety","Fairness","Drift","Latency","Availability"]
+
+incident_response:
+  severity_matrix:
+    sev1: "privacy/safety breach, regulator notification possible"
+    sev2: "material quality/fairness regression"
+    sev3: "minor defect or localized issue"
+  rca_sla_hours:
+    sev1: 24
+    sev2: 48
+    sev3: 72
+  communication:
+    internal: ["governance_lead","security_officer","risk_manager","product_owner"]
+    external_on_sev1: ["regulator","customer_success","legal"]
+  rollback:
+    last_known_good: "models/registry/lkg.json"
+    strategy: "automated via Argo CD app rollback"
+
+sprint_integration:
+  definition_of_done:
+    - "Model Card updated & committed"
+    - "Fairness & safety checks passed in CI"
+    - "Risk register delta logged"
+    - "Monitoring spec updated (metrics/alerts)"
+  ceremonies:
+    include_roles: ["risk_manager","governance_lead"]  # in sprint review & retro
+    artifacts_reviewed: ["risk posture","fairness delta","drift status","incident log summary"]
+
+maturity_targets:
+  governance_review_time_pct: 20   # governance review ≤ 20% of total cycle time
+  auto_evidence_coverage_pct: 90   # ≥90% evidence auto-generated
+  cross_functional_participation_pct: 75
+  post_deploy_unreviewed_incidents: 0
+
+links:
+  handbook: "./Handbook.md"
+  quick_start: "./Quick_Start_Guide.md"
+  technical_readme: "./Technical/README.md"
+  govcomp_readme: "./Governance & Compliance/README.md"
+  enablement_readme: "./Enablement/README.md"

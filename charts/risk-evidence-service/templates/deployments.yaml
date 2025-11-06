@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "risk-evidence-service.fullname" . | default "risk-evidence-service" }}
+  labels: { app.kubernetes.io/name: risk-evidence-service }
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app.kubernetes.io/name: risk-evidence-service }
+  template:
+    metadata:
+      labels: { app.kubernetes.io/name: risk-evidence-service }
+    spec:
+      containers:
+        - name: res
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.service.port }}
+          env:
+            - name: STORAGE_BACKEND
+              value: "{{ .Values.env.STORAGE_BACKEND }}"
+            - name: STORAGE_PATH
+              value: "{{ .Values.env.STORAGE_PATH }}"
+            - name: PAC_CONFIG
+              value: "{{ .Values.config.adrConfigPath }}"
+            - name: INCIDENT_WEBHOOK
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.env.INCIDENT_WEBHOOK_SECRET }}
+                  key: {{ .Values.env.INCIDENT_WEBHOOK_KEY }}
+          volumeMounts:
+            - name: evidence
+              mountPath: /evidence
+            - name: adr006
+              mountPath: {{ .Values.config.adrConfigMountPath }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: evidence
+          persistentVolumeClaim:
+            claimName: {{ include "risk-evidence-service.fullname" . | default "risk-evidence-service" }}-pvc
+        - name: adr006
+          configMap:
+            name: {{ .Values.config.adrConfigCM }}

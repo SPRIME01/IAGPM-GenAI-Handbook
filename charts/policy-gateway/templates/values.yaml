@@ -1,0 +1,31 @@
+image:
+  repository: ghcr.io/your-org/policy-gateway
+  tag: "v0.1.0"
+  pullPolicy: IfNotPresent
+
+service:
+  enabled: true
+  type: ClusterIP
+  port: 8081
+
+targetApp:
+  # Select the pod(s) you want to co-locate with (share labels with vLLM)
+  labels:
+    app: vllm
+  vllmPort: 8000
+
+config:
+  adrConfigCM: adr-006-config
+  adrConfigKey: adr-006.embedded-governance.yaml
+  adrConfigMountPath: /config
+  adrConfigPath: /config/adr-006.embedded-governance.yaml
+
+resources:
+  requests:
+    cpu: 250m
+    memory: 256Mi
+  limits:
+    cpu: "1"
+    memory: 512Mi
+
+podAnnotations: {}

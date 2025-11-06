@@ -1,0 +1,130 @@
+openapi: 3.0.3
+info:
+  title: Policy Gateway API
+  version: 0.1.0
+  description: >
+    Sidecar/proxy enforcing Policy-as-Code at runtime and exposing CI helpers.
+    Reads thresholds and rules from adr-006.embedded-governance.yaml|json.
+servers:
+  - url: http://policy-gateway:8081
+paths:
+  /health:
+    get:
+      summary: Liveness/Readiness
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { type: object, properties: { status: { type: string } } }
+
+  /rules:
+    get:
+      summary: Current effective rules/thresholds (merged)
+      responses:
+        '200':
+          description: Ruleset
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+
+  /filter/prompt:
+    post:
+      summary: Validate/sanitize a prompt before it hits the model
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PromptCheckRequest'
+      responses:
+        '200':
+          description: Decision
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FilterDecision'
+
+  /filter/output:
+    post:
+      summary: Validate/sanitize a model output before returning to caller
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OutputCheckRequest'
+      responses:
+        '200':
+          description: Decision
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FilterDecision'
+
+  /ci/check:
+    post:
+      summary: CI helper — evaluate eval artifacts against ADR-006 thresholds
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CiCheckRequest'
+      responses:
+        '200':
+          description: Result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CiCheckResponse'
+
+components:
+  schemas:
+    PromptCheckRequest:
+      type: object
+      required: [prompt]
+      properties:
+        prompt: { type: string }
+        context:
+          type: object
+          properties:
+            contains_pii: { type: boolean }
+            jailbreak_score: { type: number, format: float }
+            lawful_basis: { type: string, nullable: true }
+    OutputCheckRequest:
+      type: object
+      required: [output]
+      properties:
+        output: { type: string }
+        context:
+          type: object
+          properties:
+            verbatim_ratio: { type: number, format: float }
+    FilterDecision:
+      type: object
+      properties:
+        allowed: { type: boolean }
+        action:
+          type: string
+          enum: [allow, block, mask, summarize, safe_mode]
+        reasons:
+          type: array
+          items: { type: string }
+    CiCheckRequest:
+      type: object
+      required: [quality, fairness, safety, drift]
+      properties:
+        quality: { type: object, properties: { pass_at_5: { type: number } } }
+        fairness: { type: object, properties: { subgroup_delta: { type: number } } }
+        safety: { type: object, properties: { harmful_rate: { type: number } } }
+        drift: { type: object, properties: { psi: { type: number } } }
+    CiCheckResponse:
+      type: object
+      properties:
+        status: { type: string, enum: [pass, fail, warn] }
+        violations:
+          type: array
+          items: { type: string }

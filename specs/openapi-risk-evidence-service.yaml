@@ -1,0 +1,114 @@
+openapi: 3.0.3
+info:
+  title: Risk & Evidence Service (RES) API
+  version: 0.1.0
+  description: >
+    Aggregates governance evidence, emits risk snapshots, and opens incidents.
+servers:
+  - url: http://risk-evidence-service:8080
+
+paths:
+  /health:
+    get:
+      summary: Liveness/Readiness
+      responses:
+        '200':
+          description: OK
+
+  /evidence:
+    post:
+      summary: Submit evidence artifact metadata
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EvidenceRequest'
+      responses:
+        '201':
+          description: Indexed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EvidenceResponse'
+
+  /risk/snapshot:
+    get:
+      summary: Get current risk snapshot for model
+      parameters:
+        - in: query
+          name: model
+          schema: { type: string }
+          required: false
+      responses:
+        '200':
+          description: Snapshot
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiskSnapshot'
+
+  /incident:
+    post:
+      summary: Open an incident (sev1/2/3)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IncidentRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IncidentResponse'
+
+components:
+  schemas:
+    EvidenceRequest:
+      type: object
+      required: [artifactType, modelVersion, contentRef]
+      properties:
+        artifactType: { type: string, enum: [ci_evidence, eval_pack, model_card, dpia, other] }
+        modelVersion: { type: string }
+        metadata:
+          type: object
+          additionalProperties: true
+        contentRef: { type: string }
+    EvidenceResponse:
+      type: object
+      properties:
+        id: { type: string }
+        evidence_hash: { type: string }
+        stored_at: { type: string, format: date-time }
+
+    RiskSnapshot:
+      type: object
+      properties:
+        model_version: { type: string }
+        quality: { type: object, properties: { pass_at_5: { type: number } } }
+        fairness: { type: object, properties: { subgroup_delta: { type: number } } }
+        safety: { type: object, properties: { harmful_rate: { type: number } } }
+        privacy: { type: object, properties: { reid_risk: { type: number } } }
+        drift: { type: object, properties: { psi: { type: number } } }
+        eu_ai_act_tier: { type: string }
+        timestamp: { type: string, format: date-time }
+        evidence_hash: { type: string }
+
+    IncidentRequest:
+      type: object
+      required: [severity, description]
+      properties:
+        severity: { type: string, enum: [sev1, sev2, sev3] }
+        description: { type: string }
+        refs:
+          type: array
+          items: { type: string }
+    IncidentResponse:
+      type: object
+      properties:
+        id: { type: string }
+        created_at: { type: string, format: date-time }
+        link: { type: string }

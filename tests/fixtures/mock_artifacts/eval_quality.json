@@ -1,0 +1,9 @@
+{
+    "pass_at_5": 0.84,
+    "pass_at_1": 0.72,
+    "pass_at_10": 0.91,
+    "model_version": "llama-3-8b-v1.2",
+    "eval_dataset": "humaneval",
+    "timestamp": "2025-11-05T10:30:00Z",
+    "samples_evaluated": 164
+}

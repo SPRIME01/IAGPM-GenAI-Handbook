@@ -1,0 +1,24 @@
+set shell := ["bash", "-eu", "-o", "pipefail", "-c"]
+
+pac_cfg := "adr-006.embedded-governance.yaml"
+
+ci-check:
+    python3 tools/pac_ci.py \
+      --config {{pac_cfg}} \
+      --eval artifacts/eval_quality.json \
+      --fairness artifacts/eval_fairness.json \
+      --safety artifacts/eval_safety.json \
+      --drift artifacts/eval_drift.json
+
+deploy-config:
+    kubectl apply -f deploy/policy-gateway/configmap.yaml
+
+deploy-res:
+    kubectl apply -f deploy/risk-evidence-service/secret.sample.yaml || true
+    kubectl apply -f deploy/risk-evidence-service/deployment.yaml
+    kubectl apply -f deploy/risk-evidence-service/service.yaml
+
+deploy-vllm-with-gateway:
+    helm upgrade --install policy-gateway ./deploy/policy-gateway \
+      -f deploy/policy-gateway/values.yaml
+    kubectl apply -f deploy/policy-gateway/service.yaml

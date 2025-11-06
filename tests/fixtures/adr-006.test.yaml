@@ -1,0 +1,52 @@
+meta:
+  adr_id: "ADR-006-TEST"
+  title: "Test Configuration for CI/Testing"
+  version: "1.0"
+  status: "test"
+  date: "2025-11-05"
+
+frameworks:
+  cpmai_e:
+    phases:
+      - I: "Business Understanding"
+      - II: "Data Understanding"
+      - III: "Data Preparation"
+      - IV: "Model Development"
+      - V: "Evaluation"
+      - VI: "Operationalization"
+  nist_ai_rmf: ["Govern", "Map", "Measure", "Manage"]
+
+ownership:
+  roles:
+    governance_lead: "test@example.com"
+    ml_engineer: "test@example.com"
+
+policy_as_code:
+  rules:
+    - id: "test_pii_block"
+      description: "Test PII blocking rule"
+      when: "prompt.contains_pii == true and lawful_basis == false"
+      action: "block"
+      owner: "test@example.com"
+    - id: "test_jailbreak"
+      description: "Test jailbreak detection"
+      when: "prompt.jailbreak_score > 0.8"
+      action: "safe_mode"
+      owner: "test@example.com"
+    - id: "test_copyright"
+      description: "Test copyright protection"
+      when: "output.verbatim_ratio > 0.2"
+      action: "summarize"
+      owner: "test@example.com"
+
+thresholds:
+  quality:
+    pass_at_5: { target: 0.80, block_below: true }
+  fairness:
+    subgroup_delta: { target_max: 0.05, block_above: true }
+  safety:
+    harmful_rate: { target_max: 0.005, block_above: true }
+  privacy:
+    reid_risk: { target_max: 0.001, block_above: true }
+  drift:
+    psi: { warn_at: 0.1, retrain_at: 0.2 }

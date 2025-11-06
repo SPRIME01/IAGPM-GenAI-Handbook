@@ -1,0 +1,132 @@
+{
+    "id": null,
+    "title": "Governed Speed — Quality • Safety • Fairness • Drift",
+    "timezone": "browser",
+    "schemaVersion": 39,
+    "version": 1,
+    "refresh": "10s",
+    "panels": [
+        {
+            "type": "stat",
+            "title": "Quality — pass@5",
+            "gridPos": {
+                "x": 0,
+                "y": 0,
+                "w": 6,
+                "h": 4
+            },
+            "targets": [
+                {
+                    "expr": "llm_pass_at_5",
+                    "refId": "A",
+                    "datasource": "Prometheus"
+                }
+            ]
+        },
+        {
+            "type": "stat",
+            "title": "Safety — harmful output rate",
+            "gridPos": {
+                "x": 6,
+                "y": 0,
+                "w": 6,
+                "h": 4
+            },
+            "targets": [
+                {
+                    "expr": "harmful_output_rate",
+                    "refId": "A",
+                    "datasource": "Prometheus"
+                }
+            ]
+        },
+        {
+            "type": "stat",
+            "title": "Fairness — subgroup Δ",
+            "gridPos": {
+                "x": 12,
+                "y": 0,
+                "w": 6,
+                "h": 4
+            },
+            "targets": [
+                {
+                    "expr": "fairness_subgroup_delta",
+                    "refId": "A",
+                    "datasource": "Prometheus"
+                }
+            ]
+        },
+        {
+            "type": "stat",
+            "title": "Drift — PSI",
+            "gridPos": {
+                "x": 18,
+                "y": 0,
+                "w": 6,
+                "h": 4
+            },
+            "targets": [
+                {
+                    "expr": "drift_psi",
+                    "refId": "A",
+                    "datasource": "Prometheus"
+                }
+            ]
+        },
+        {
+            "type": "graph",
+            "title": "Latency p95 (s)",
+            "gridPos": {
+                "x": 0,
+                "y": 4,
+                "w": 12,
+                "h": 7
+            },
+            "targets": [
+                {
+                    "expr": "latency_p95_seconds",
+                    "refId": "A",
+                    "datasource": "Prometheus"
+                }
+            ]
+        },
+        {
+            "type": "graph",
+            "title": "Requests per second",
+            "gridPos": {
+                "x": 12,
+                "y": 4,
+                "w": 12,
+                "h": 7
+            },
+            "targets": [
+                {
+                    "expr": "rate(llm_requests_total[1m])",
+                    "refId": "A",
+                    "datasource": "Prometheus"
+                }
+            ]
+        },
+        {
+            "type": "table",
+            "title": "Evidence Events (last 1h)",
+            "gridPos": {
+                "x": 0,
+                "y": 11,
+                "w": 24,
+                "h": 8
+            },
+            "targets": [
+                {
+                    "expr": "increase(res_evidence_events_total[1h])",
+                    "refId": "A",
+                    "datasource": "Prometheus"
+                }
+            ]
+        }
+    ],
+    "templating": {
+        "list": []
+    }
+}

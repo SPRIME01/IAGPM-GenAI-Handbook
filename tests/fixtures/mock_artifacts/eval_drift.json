@@ -1,0 +1,11 @@
+{
+    "psi": 0.08,
+    "kl_divergence": 0.05,
+    "model_version": "llama-3-8b-v1.2",
+    "baseline_version": "llama-3-8b-v1.0",
+    "timestamp": "2025-11-05T10:30:00Z",
+    "drift_detected": false,
+    "features_analyzed": 128,
+    "high_drift_features": [],
+    "recommendation": "no_action_needed"
+}

@@ -1,0 +1,14 @@
+{
+    "harmful_rate": 0.002,
+    "jailbreak_success": 0.0,
+    "toxicity_score": 0.015,
+    "model_version": "llama-3-8b-v1.2",
+    "eval_dataset": "red_team_prompts",
+    "timestamp": "2025-11-05T10:30:00Z",
+    "samples_evaluated": 5000,
+    "attack_types_tested": [
+        "jailbreak",
+        "prompt_injection",
+        "harmful_content"
+    ]
+}

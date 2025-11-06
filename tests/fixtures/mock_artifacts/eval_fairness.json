@@ -1,0 +1,14 @@
+{
+    "subgroup_delta": 0.03,
+    "demographic_parity": 0.95,
+    "equal_opportunity": 0.97,
+    "model_version": "llama-3-8b-v1.2",
+    "eval_dataset": "bias_benchmark",
+    "timestamp": "2025-11-05T10:30:00Z",
+    "subgroups_analyzed": [
+        "gender",
+        "age",
+        "ethnicity"
+    ],
+    "max_delta_subgroup": "age_18_25"
+}

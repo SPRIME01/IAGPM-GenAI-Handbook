@@ -1,0 +1,111 @@
+name: governed-speed-ci
+
+on:
+  pull_request:
+    branches: [ main ]
+  push:
+    branches: [ main ]
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: |
+          pip install -U pip pyyaml requests jq
+
+      - name: Load ADR-006 config
+        id: cfg
+        run: |
+          if [ -f adr-006.embedded-governance.yaml ]; then
+            python - <<'PY'
+import yaml, json, os
+with open("adr-006.embedded-governance.yaml") as f:
+    cfg = yaml.safe_load(f)
+print("::set-output name=json::" + json.dumps(cfg))
+PY
+          elif [ -f adr-006.embedded-governance.json ]; then
+            echo "::set-output name=json::$(cat adr-006.embedded-governance.json)"
+          else
+            echo "ADR-006 config missing"; exit 1
+          fi
+
+      - name: Generate/Collect Eval Artifacts (example)
+        run: |
+          mkdir -p artifacts
+          # Replace these with your real eval steps/tools
+          echo '{"pass_at_5":0.84}' > artifacts/eval_quality.json
+          echo '{"subgroup_delta":0.03}' > artifacts/eval_fairness.json
+          echo '{"harmful_rate":0.002}' > artifacts/eval_safety.json
+          echo '{"psi":0.08}' > artifacts/eval_drift.json
+          test -f artifacts/model_card.md || echo -e "# Model Card\npurpose: demo" > artifacts/model_card.md
+
+      - name: Governance Gate — Evaluate Thresholds
+        id: gate
+        run: |
+          python - <<'PY'
+import json, sys, os
+cfg = json.loads(os.environ["ADR006"])
+def get(cfg,*ks):
+    d=cfg
+    for k in ks:
+        d=d[k]
+    return d
+# Load evals
+import json
+with open("artifacts/eval_quality.json") as f: q = json.load(f)["pass_at_5"]
+with open("artifacts/eval_fairness.json") as f: fair = json.load(f)["subgroup_delta"]
+with open("artifacts/eval_safety.json") as f: harm = json.load(f)["harmful_rate"]
+with open("artifacts/eval_drift.json") as f: psi = json.load(f)["psi"]
+# Thresholds from ADR-006
+qt = get(cfg,"thresholds","quality","pass_at_5","target")
+ft = get(cfg,"thresholds","fairness","subgroup_delta","target_max")
+st = get(cfg,"thresholds","safety","harmful_rate","target_max")
+pw = get(cfg,"thresholds","drift","psi","warn_at")
+pr = get(cfg,"thresholds","drift","psi","retrain_at")
+viol=[]
+if q < qt: viol.append(f"quality.pass_at_5 {q} < target {qt}")
+if fair > ft: viol.append(f"fairness.subgroup_delta {fair} > max {ft}")
+if harm > st: viol.append(f"safety.harmful_rate {harm} > max {st}")
+# Drift is warning/retrain—not hard fail
+status="pass"
+if viol:
+    status="fail"
+print("::set-output name=status::"+status)
+print("::set-output name=violations::"+json.dumps(viol))
+PY
+        env:
+          ADR006: ${{ steps.cfg.outputs.json }}
+
+      - name: Fail on Hard Violations
+        if: steps.gate.outputs.status == 'fail'
+        run: |
+          echo "Governance violations:"
+          echo '${{ steps.gate.outputs.violations }}'
+          exit 1
+
+      - name: Post Evidence to Risk & Evidence Service
+        if: ${{ always() }}
+        run: |
+          curl -sS -X POST http://risk-evidence-service.default.svc.cluster.local:8080/evidence \
+            -H "Content-Type: application/json" \
+            -d @- <<'JSON'
+          {
+            "artifactType":"ci_evidence",
+            "modelVersion":"${{ github.sha }}",
+            "metadata":{
+              "branch":"${{ github.ref }}",
+              "repo":"${{ github.repository }}",
+              "violations":${{ steps.gate.outputs.violations }}
+            },
+            "contentRef":"s3://artifacts/${{ github.sha }}/"
+          }
+JSON
