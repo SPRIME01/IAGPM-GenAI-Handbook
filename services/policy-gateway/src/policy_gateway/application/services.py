@@ -72,7 +72,7 @@ class PolicyDecisionService:
         if safety_max is not None and request.safety.get("harmful_rate", 0) > safety_max:
             violations.append("safety.harmful_rate")
 
-        status = "pass" if not violations else "fail"
+        status = "fail" if violations else "pass"
         return CiCheckResult(status=status, violations=violations)
 
     @staticmethod
