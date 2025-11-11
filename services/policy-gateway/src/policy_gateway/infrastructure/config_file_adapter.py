@@ -21,8 +21,21 @@ class ConfigFileAdapter(ConfigurationPort):
         try:
             if self._path.suffix in {".yml", ".yaml"}:
                 return yaml.safe_load(self._path.read_text()) or {}
-            return json.loads(self._path.read_text())
-        except Exception as e:
-            import logging
-            logging.error(f"Failed to load configuration from {self._path}: {e}")
+    def load(self) -> dict:
+        if not self._path.exists():
             return {}
+        try:
+            raw = self._path.read_text(encoding="utf-8")
+        except OSError as exc:
+            raise RuntimeError(f"Unable to read configuration file {self._path}") from exc
+
+        if self._path.suffix in {".yml", ".yaml"}:
+            try:
+                return yaml.safe_load(raw) or {}
+            except yaml.YAMLError as exc:
+                raise ValueError(f"Invalid YAML in {self._path}") from exc
+
+        try:
+            return json.loads(raw)
+        except json.JSONDecodeError as exc:
+            raise ValueError(f"Invalid JSON in {self._path}") from exc
