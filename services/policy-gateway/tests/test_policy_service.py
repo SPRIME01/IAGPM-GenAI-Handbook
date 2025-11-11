@@ -57,6 +57,22 @@ def test_output_summarize_when_verbatim_high():
     assert result.action == "summarize"
 
 
+def test_output_no_summarize_when_verbatim_at_threshold():
+    service = create_service()
+    request = OutputDecisionInput(output="o", context={"verbatim_ratio": 0.2})
+    result = service.decide_output(request)
+    assert result.allowed is True
+    assert result.action != "summarize"
+
+
+def test_output_no_summarize_when_verbatim_below_threshold():
+    service = create_service()
+    request = OutputDecisionInput(output="o", context={"verbatim_ratio": 0.19})
+    result = service.decide_output(request)
+    assert result.allowed is True
+    assert result.action != "summarize"
+
+
 def test_ci_check_detects_violations():
     cfg = {
         "thresholds": {
