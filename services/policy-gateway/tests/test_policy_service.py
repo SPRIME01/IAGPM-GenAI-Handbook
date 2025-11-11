@@ -10,7 +10,7 @@ from policy_gateway.domain.models import CiCheckInput, OutputDecisionInput, Prom
 from policy_gateway.infrastructure.config_file_adapter import ConfigFileAdapter
 
 
-class InMemoryConfigAdapter:
+class InMemoryConfigAdapter(ConfigurationPort):
     def __init__(self, data: dict):
         self._data = data
 
