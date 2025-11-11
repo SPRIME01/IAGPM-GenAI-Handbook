@@ -126,6 +126,24 @@ def test_config_file_adapter_reads_yaml(tmp_path: Path):
     assert adapter.load() == config_data
 
 
+def test_config_file_adapter_invalid_yaml(tmp_path: Path):
+    # Write invalid YAML content
+    cfg_path = tmp_path / "invalid.yaml"
+    cfg_path.write_text("foo: [unclosed_list\nbar: baz")
+
+    adapter = ConfigFileAdapter(cfg_path)
+    assert adapter.load() == {}
+
+
+def test_config_file_adapter_invalid_json(tmp_path: Path):
+    # Write invalid JSON content
+    cfg_path = tmp_path / "invalid.json"
+    cfg_path.write_text('{"foo": "bar", "baz": [1, 2,}')  # Invalid JSON
+
+    adapter = ConfigFileAdapter(cfg_path)
+    assert adapter.load() == {}
+
+
 def test_config_file_adapter_handles_json(tmp_path: Path):
     config_data = {"foo": "bar"}
     cfg_path = tmp_path / "config.json"
