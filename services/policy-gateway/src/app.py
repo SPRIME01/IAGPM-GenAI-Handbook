@@ -1,106 +1,84 @@
-from fastapi import FastAPI
-from pydantic import BaseModel
-import os, json, yaml
+from __future__ import annotations
 
-app = FastAPI(title="Policy Gateway")
+import os
+from typing import Dict
+
+from fastapi import Depends, FastAPI
+
+from policy_gateway.application.services import PolicyDecisionService
+from policy_gateway.domain.models import (
+    CiCheckInput,
+    OutputDecisionInput,
+    PromptDecisionInput,
+)
+from policy_gateway.infrastructure.config_file_adapter import ConfigFileAdapter
+from policy_gateway.interface.http.schemas import (
+    CiCheckRequest,
+    CiCheckResponse,
+    DecisionResponse,
+    OutputCheckRequest,
+    PromptCheckRequest,
+)
 
 CFG_PATH = os.getenv("PAC_CONFIG", "/config/adr-006.embedded-governance.yaml")
-UPSTREAM = os.getenv("PAC_UPSTREAM_URL", "http://localhost:8000")
 
 
-def load_cfg():
-    try:
-        if CFG_PATH.endswith((".yml", ".yaml")):
-            return yaml.safe_load(open(CFG_PATH))
-        return json.load(open(CFG_PATH))
-    except Exception:
-        return {}
+def _build_service() -> PolicyDecisionService:
+    configuration_adapter = ConfigFileAdapter(CFG_PATH)
+    return PolicyDecisionService(configuration_adapter)
+
+
+app = FastAPI(title="Policy Gateway")
+SERVICE = _build_service()
+
+
+def get_service() -> PolicyDecisionService:
+    return SERVICE
 
 
 @app.get("/health")
-def health():
-    return {"status": "ok"}
+def health(service: PolicyDecisionService = Depends(get_service)) -> Dict[str, str]:
+    return service.health()
 
 
 @app.get("/rules")
-def rules():
-    return load_cfg()
+def rules(service: PolicyDecisionService = Depends(get_service)) -> Dict[str, object]:
+    return service.rules().to_dict()
 
 
-class PromptCheckRequest(BaseModel):
-    prompt: str
-    context: dict | None = None
+@app.post("/filter/prompt", response_model=DecisionResponse)
+def filter_prompt(
+    body: PromptCheckRequest,
+    service: PolicyDecisionService = Depends(get_service),
+) -> DecisionResponse:
+    decision = service.decide_prompt(
+        PromptDecisionInput(prompt=body.prompt, context=body.context or {})
+    )
+    return DecisionResponse(**decision.__dict__)
 
 
-class OutputCheckRequest(BaseModel):
-    output: str
-    context: dict | None = None
+@app.post("/filter/output", response_model=DecisionResponse)
+def filter_output(
+    body: OutputCheckRequest,
+    service: PolicyDecisionService = Depends(get_service),
+) -> DecisionResponse:
+    decision = service.decide_output(
+        OutputDecisionInput(output=body.output, context=body.context or {})
+    )
+    return DecisionResponse(**decision.__dict__)
 
 
-def decide_prompt(body: PromptCheckRequest, cfg):
-    ctx = body.context or {}
-    # simple demo logic based on ADR-006 examples
-    if ctx.get("contains_pii") and not ctx.get("lawful_basis"):
-        return {
-            "allowed": False,
-            "action": "block",
-            "reasons": ["PII without lawful basis"],
-        }
-    if ctx.get("jailbreak_score", 0) > 0.8:
-        return {
-            "allowed": True,
-            "action": "safe_mode",
-            "reasons": ["high jailbreak score"],
-        }
-    return {"allowed": True, "action": "allow", "reasons": []}
-
-
-def decide_output(body: OutputCheckRequest, cfg):
-    ctx = body.context or {}
-    if ctx.get("verbatim_ratio", 0) > 0.2:
-        return {
-            "allowed": True,
-            "action": "summarize",
-            "reasons": ["verbatim over limit"],
-        }
-    return {"allowed": True, "action": "allow", "reasons": []}
-
-
-@app.post("/filter/prompt")
-def filter_prompt(body: PromptCheckRequest):
-    return decide_prompt(body, load_cfg())
-
-
-@app.post("/filter/output")
-def filter_output(body: OutputCheckRequest):
-    return decide_output(body, load_cfg())
-
-
-class CiCheckRequest(BaseModel):
-    quality: dict
-    fairness: dict
-    safety: dict
-    drift: dict
-
-
-@app.post("/ci/check")
-def ci_check(body: CiCheckRequest):
-    cfg = load_cfg()
-    viol = []
-    if (
-        body.quality.get("pass_at_5", 0)
-        < cfg["thresholds"]["quality"]["pass_at_5"]["target"]
-    ):
-        viol.append("quality.pass_at_5")
-    if (
-        body.fairness.get("subgroup_delta", 1)
-        > cfg["thresholds"]["fairness"]["subgroup_delta"]["target_max"]
-    ):
-        viol.append("fairness.subgroup_delta")
-    if (
-        body.safety.get("harmful_rate", 1)
-        > cfg["thresholds"]["safety"]["harmful_rate"]["target_max"]
-    ):
-        viol.append("safety.harmful_rate")
-    status = "pass" if not viol else "fail"
-    return {"status": status, "violations": viol}
+@app.post("/ci/check", response_model=CiCheckResponse)
+def ci_check(
+    body: CiCheckRequest,
+    service: PolicyDecisionService = Depends(get_service),
+) -> CiCheckResponse:
+    result = service.ci_check(
+        CiCheckInput(
+            quality=body.quality,
+            fairness=body.fairness,
+            safety=body.safety,
+            drift=body.drift,
+        )
+    )
+    return CiCheckResponse(**result.__dict__)
