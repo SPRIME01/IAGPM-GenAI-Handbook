@@ -22,5 +22,7 @@ class ConfigFileAdapter(ConfigurationPort):
             if self._path.suffix in {".yml", ".yaml"}:
                 return yaml.safe_load(self._path.read_text()) or {}
             return json.loads(self._path.read_text())
-        except Exception:
+        except Exception as e:
+            import logging
+            logging.error(f"Failed to load configuration from {self._path}: {e}")
             return {}
