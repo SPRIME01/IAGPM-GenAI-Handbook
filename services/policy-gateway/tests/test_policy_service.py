@@ -31,6 +31,16 @@ def test_prompt_blocks_when_pii_without_basis():
     assert "PII without lawful basis" in result.reasons
 
 
+def test_prompt_allows_when_pii_with_lawful_basis():
+    service = create_service()
+    request = PromptDecisionInput(
+        prompt="hi",
+        context={"contains_pii": True, "lawful_basis": "consent"}
+    )
+    result = service.decide_prompt(request)
+    assert result.allowed is True
+    assert result.action != "block"
+    assert "PII without lawful basis" not in result.reasons
 def test_prompt_safe_mode_when_jailbreak_high():
     service = create_service()
     request = PromptDecisionInput(prompt="hi", context={"jailbreak_score": 0.9})
