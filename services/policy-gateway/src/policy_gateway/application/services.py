@@ -82,7 +82,7 @@ class PolicyDecisionService:
         metric_key: str,
         value_key: str,
     ) -> float | None:
-        domain_cfg = thresholds.get(domain_key, {}) if thresholds else {}
+        domain_cfg = thresholds.get(domain_key, {})
         metric_cfg = domain_cfg.get(metric_key, {})
         value = metric_cfg.get(value_key)
         if value is None:
