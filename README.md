@@ -199,19 +199,39 @@ curl -N -H "Content-Type: application/json" \
   -d '{"prompt":"Write a short poem","model":"gpt-mock"}'
 ```
 
-JavaScript EventSource example (browser or Node w/ EventSource polyfill):
+JavaScript streaming examples (browser)
+
+Native EventSource only supports GET requests. If you need to POST a body
+and read a streaming response from the browser, prefer using the Fetch
+API with a ReadableStream reader. Example:
 
 ```javascript
-const es = new EventSource('/proxy/completion/stream', { method: 'POST', body: JSON.stringify({ prompt: 'Hi' }) });
-es.onmessage = (e) => console.log('chunk:', e.data);
-es.onerror = (err) => { console.error(err); es.close(); };
+// POST and read streaming response using fetch + ReadableStream
+async function streamCompletion() {
+  const resp = await fetch('/proxy/completion/stream', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ prompt: 'Hi' }),
+  });
+
+  if (!resp.body) throw new Error('No streaming body on response');
+  const reader = resp.body.getReader();
+  const decoder = new TextDecoder();
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    const chunk = decoder.decode(value, { stream: true });
+    console.log('chunk:', chunk);
+  }
+}
+
+streamCompletion().catch((err) => console.error('stream error', err));
 ```
 
-Note: Some EventSource clients don't support POST natively — for browser
-clients prefer using fetch with ReadableStream or a small SSE helper that
-establishes a streaming GET connection to a specially implemented proxy when
-needed. The curl example above demonstrates a low-friction test of the
-endpoint.
+If you specifically want an EventSource-style API and are willing to add a
+small polyfill, you can use a library such as `event-source-polyfill` in
+Node/browser environments that require POST/advanced behavior — but be
+explicit: native EventSource is GET-only.
 
 Testing:
 

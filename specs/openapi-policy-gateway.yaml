@@ -161,3 +161,4 @@ components:
         usage:
           type: object
           additionalProperties: true
+      required: ["content", "model"]

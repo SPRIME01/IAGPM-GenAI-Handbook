@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 import os
 from typing import Dict
 
@@ -38,7 +37,18 @@ class HTTPLLMAdapter(LLMAdapterPort):
         except Exception as exc:  # keep broad for adapter boundary
             raise RuntimeError(f"LLM request failed: {exc}") from exc
 
-        content = j.get("content") or j.get("text") or json.dumps(j)
+        # Validate expected response shape: prefer `content` then `text`.
+        if "content" in j and j.get("content") is not None:
+            content = j.get("content")
+        elif "text" in j and j.get("text") is not None:
+            content = j.get("text")
+        else:
+            # Upstream returned an unexpected payload — include diagnostics
+            body_snippet = resp.text if hasattr(resp, "text") else str(j)
+            raise ValueError(
+                f"Upstream LLM response missing 'content'/'text'; status={resp.status_code}, body={body_snippet[:1000]}"
+            )
+
         return CompletionResponse(
             content=str(content), model=j.get("model"), usage=j.get("usage", {})
         )

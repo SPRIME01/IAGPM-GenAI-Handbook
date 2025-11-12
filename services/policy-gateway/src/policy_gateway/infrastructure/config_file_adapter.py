@@ -30,11 +30,15 @@ class ConfigFileAdapter(ConfigurationPort):
 
         if self._path.suffix in {".yml", ".yaml"}:
             try:
-                return yaml.safe_load(raw) or {}
+                parsed = yaml.safe_load(raw)
+                # yaml.safe_load may return non-dict types for simple values
+                # (e.g., a list or string). Ensure we return a dict per API.
+                return parsed if isinstance(parsed, dict) else {}
             except yaml.YAMLError:
                 return {}
 
         try:
-            return json.loads(raw)
+            parsed = json.loads(raw)
+            return parsed if isinstance(parsed, dict) else {}
         except json.JSONDecodeError:
             return {}

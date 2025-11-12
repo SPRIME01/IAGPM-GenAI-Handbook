@@ -1,5 +1,7 @@
 import json
 import threading
+import socket
+import time
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 
@@ -40,16 +42,31 @@ def test_proxy_forwards_to_mock_vllm(monkeypatch, tmp_path):
     thread = threading.Thread(target=run_mock_server, args=(server,), daemon=True)
     thread.start()
 
+    # Wait for the server to become ready (avoid racey failures on slow CI)
+    deadline = time.time() + 2.0
+    ready = False
+    while time.time() < deadline:
+        try:
+            s = socket.create_connection(("localhost", port), timeout=0.5)
+            s.close()
+            ready = True
+            break
+        except Exception:
+            time.sleep(0.05)
+    if not ready:
+        server.shutdown()
+        server.server_close()
+        raise RuntimeError("Mock vLLM server failed to start in time")
+
     try:
         # Point adapter to the mock server
         monkeypatch.setenv("PAC_UPSTREAM_URL", f"http://localhost:{port}")
 
-        # Ensure the app imports from the correct src path
+        # Ensure the app imports from the correct src path without mutating
+        # global sys.path for other tests.
         repo_root = Path(__file__).resolve().parents[3]
         src_dir = str(repo_root / "services" / "policy-gateway" / "src")
-        import sys
-
-        sys.path.insert(0, src_dir)
+        monkeypatch.syspath_prepend(src_dir)
         import app as gateway_app  # type: ignore
 
         client = TestClient(gateway_app.app)

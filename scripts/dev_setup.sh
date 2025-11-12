@@ -32,12 +32,11 @@ source "$REPO_ROOT/.venv/bin/activate"
 python3 -m pip install --upgrade pip
 
 # Install requirements preferring uv if available inside the venv
-if command -v uv >/dev/null 2>&1; then
+  if command -v uv >/dev/null 2>&1; then
   echo "Using uv to install requirements from $REQ inside venv"
-  if uv install -r "$REQ" 2>/dev/null; then
-    echo "Installed with: uv install -r $REQ"
-  elif uv add -r "$REQ" 2>/dev/null; then
-    echo "Installed with: uv add -r $REQ"
+  # Use uv to run pip inside the venv. Do not suppress errors so failures are visible.
+  if uv pip install -r "$REQ"; then
+    echo "Installed with: uv pip install -r $REQ"
   else
     echo "uv present but failed to install requirements; falling back to pip" >&2
     python3 -m pip install -r "$REQ"
