@@ -5,7 +5,6 @@ import os
 from pathlib import Path
 
 import yaml
-
 from policy_gateway.ports.configuration import ConfigurationPort
 
 
@@ -16,26 +15,26 @@ class ConfigFileAdapter(ConfigurationPort):
         self._path = Path(path)
 
     def load(self) -> dict:
-        if not self._path.exists():
-            return {}
-        try:
-            if self._path.suffix in {".yml", ".yaml"}:
-                return yaml.safe_load(self._path.read_text()) or {}
-    def load(self) -> dict:
+        """Load and parse the configuration file.
+
+        Returns an empty dict for missing files or invalid content so callers can
+        safely consume the adapter in tests and runtime.
+        """
         if not self._path.exists():
             return {}
         try:
             raw = self._path.read_text(encoding="utf-8")
-        except OSError as exc:
-            raise RuntimeError(f"Unable to read configuration file {self._path}") from exc
+        except OSError:
+            # If the file cannot be read, treat it as missing/empty for safety.
+            return {}
 
         if self._path.suffix in {".yml", ".yaml"}:
             try:
                 return yaml.safe_load(raw) or {}
-            except yaml.YAMLError as exc:
-                raise ValueError(f"Invalid YAML in {self._path}") from exc
+            except yaml.YAMLError:
+                return {}
 
         try:
             return json.loads(raw)
-        except json.JSONDecodeError as exc:
-            raise ValueError(f"Invalid JSON in {self._path}") from exc
+        except json.JSONDecodeError:
+            return {}

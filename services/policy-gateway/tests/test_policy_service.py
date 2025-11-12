@@ -4,10 +4,14 @@ import json
 from pathlib import Path
 
 import yaml
-
 from policy_gateway.application.services import PolicyDecisionService
-from policy_gateway.domain.models import CiCheckInput, OutputDecisionInput, PromptDecisionInput
+from policy_gateway.domain.models import (
+    CiCheckInput,
+    OutputDecisionInput,
+    PromptDecisionInput,
+)
 from policy_gateway.infrastructure.config_file_adapter import ConfigFileAdapter
+from policy_gateway.ports.configuration import ConfigurationPort
 
 
 class InMemoryConfigAdapter(ConfigurationPort):
@@ -34,13 +38,14 @@ def test_prompt_blocks_when_pii_without_basis():
 def test_prompt_allows_when_pii_with_lawful_basis():
     service = create_service()
     request = PromptDecisionInput(
-        prompt="hi",
-        context={"contains_pii": True, "lawful_basis": "consent"}
+        prompt="hi", context={"contains_pii": True, "lawful_basis": "consent"}
     )
     result = service.decide_prompt(request)
     assert result.allowed is True
     assert result.action != "block"
     assert "PII without lawful basis" not in result.reasons
+
+
 def test_prompt_safe_mode_when_jailbreak_high():
     service = create_service()
     request = PromptDecisionInput(prompt="hi", context={"jailbreak_score": 0.9})

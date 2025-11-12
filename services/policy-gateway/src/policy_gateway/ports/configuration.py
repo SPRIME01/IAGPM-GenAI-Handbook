@@ -8,5 +8,4 @@ class ConfigurationPort(Protocol):
 
     def load(self) -> dict:
         """Return the latest configuration data for the gateway."""
-
-        raise NotImplementedError
+        ...

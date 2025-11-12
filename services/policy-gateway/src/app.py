@@ -4,7 +4,6 @@ import os
 from typing import Dict
 
 from fastapi import Depends, FastAPI
-
 from policy_gateway.application.services import PolicyDecisionService
 from policy_gateway.domain.models import (
     CiCheckInput,
@@ -54,7 +53,8 @@ def filter_prompt(
     decision = service.decide_prompt(
         PromptDecisionInput(prompt=body.prompt, context=body.context or {})
     )
-    return DecisionResponse(**decision.__dict__)
+    # Use centralized mapping from the domain model
+    return DecisionResponse(**decision.to_response())
 
 
 @app.post("/filter/output", response_model=DecisionResponse)
@@ -65,7 +65,7 @@ def filter_output(
     decision = service.decide_output(
         OutputDecisionInput(output=body.output, context=body.context or {})
     )
-    return DecisionResponse(**decision.__dict__)
+    return DecisionResponse(**decision.to_response())
 
 
 @app.post("/ci/check", response_model=CiCheckResponse)
@@ -81,4 +81,4 @@ def ci_check(
             drift=body.drift,
         )
     )
-    return CiCheckResponse(**result.__dict__)
+    return CiCheckResponse(**result.to_response())

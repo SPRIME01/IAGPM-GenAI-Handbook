@@ -30,11 +30,30 @@ class DecisionResult:
     action: str
     reasons: List[str] = field(default_factory=list)
 
+    def to_response(self) -> Dict[str, object]:
+        """Return a plain dict shaped like the HTTP DecisionResponse.
+
+        Keep the return type plain (dict) so the HTTP layer can pass it to
+        Pydantic as: DecisionResponse(**decision.to_response()).
+        """
+        return {
+            "allowed": bool(self.allowed),
+            "action": self.action,
+            "reasons": list(self.reasons or []),
+        }
+
 
 @dataclass(frozen=True)
 class CiCheckResult:
     status: str
     violations: List[str] = field(default_factory=list)
+
+    def to_response(self) -> Dict[str, object]:
+        """Return a plain dict shaped like the HTTP CiCheckResponse."""
+        return {
+            "status": self.status,
+            "violations": list(self.violations or []),
+        }
 
 
 @dataclass(frozen=True)
