@@ -11,28 +11,91 @@ from policy_gateway.domain.models import (
     PromptDecisionInput,
 )
 from policy_gateway.infrastructure.config_file_adapter import ConfigFileAdapter
+from policy_gateway.infrastructure.litellm_adapter import LiteLLMAdapter
+from policy_gateway.infrastructure.llm_http_adapter import HTTPLLMAdapter
 from policy_gateway.interface.http.schemas import (
     CiCheckRequest,
     CiCheckResponse,
+    CompletionRequest,
+    CompletionResponse,
     DecisionResponse,
     OutputCheckRequest,
     PromptCheckRequest,
 )
-
-CFG_PATH = os.getenv("PAC_CONFIG", "/config/adr-006.embedded-governance.yaml")
+from starlette.responses import StreamingResponse
 
 
 def _build_service() -> PolicyDecisionService:
-    configuration_adapter = ConfigFileAdapter(CFG_PATH)
+    cfg_path = os.getenv("PAC_CONFIG", "/config/adr-006.embedded-governance.yaml")
+    configuration_adapter = ConfigFileAdapter(cfg_path)
     return PolicyDecisionService(configuration_adapter)
 
 
 app = FastAPI(title="Policy Gateway")
-SERVICE = _build_service()
 
 
 def get_service() -> PolicyDecisionService:
-    return SERVICE
+    # Build a fresh service for each test/request to ensure environment
+    # variables (like PAC_CONFIG) are picked up when tests monkeypatch them.
+    return _build_service()
+
+
+def _build_llm_adapter():
+    """Factory for LLM adapters. Selects implementation using PAC_LLM_PROVIDER.
+
+    Supported values for PAC_LLM_PROVIDER:
+      - "litellm" -> LiteLLMAdapter (requires litellm package)
+      - "http" (default) -> HTTPLLMAdapter
+    """
+    provider = os.getenv("PAC_LLM_PROVIDER", "http").lower()
+    if provider == "litellm":
+        # May raise if litellm is not installed — that's fine; surface as runtime error
+        return LiteLLMAdapter()
+    # default to HTTP forwarder
+    return HTTPLLMAdapter()
+
+
+@app.post("/proxy/completion", response_model=CompletionResponse)
+def proxy_completion(
+    body: CompletionRequest,
+):
+    adapter = _build_llm_adapter()
+    # map HTTP request -> domain request
+    from policy_gateway.domain.models import (
+        CompletionRequest as DomainCompletionRequest,
+    )
+
+    domain_req = DomainCompletionRequest(
+        prompt=body.prompt, model=body.model, max_tokens=body.max_tokens
+    )
+    result = adapter.complete(domain_req)
+    return CompletionResponse(
+        content=result.content, model=result.model, usage=result.usage
+    )
+
+
+@app.post("/proxy/completion/stream")
+def proxy_completion_stream(body: CompletionRequest):
+    """Stream completion results as Server-Sent-Events (SSE).
+
+    The endpoint yields `data: <chunk>\n\n` for each chunk produced by the
+    selected LLM adapter's stream() method.
+    """
+    adapter = _build_llm_adapter()
+    from policy_gateway.domain.models import (
+        CompletionRequest as DomainCompletionRequest,
+    )
+
+    domain_req = DomainCompletionRequest(
+        prompt=body.prompt, model=body.model, max_tokens=body.max_tokens
+    )
+
+    def event_stream():
+        for chunk in adapter.stream(domain_req):
+            # SSE requires each event to be prefixed with `data:` and terminated by a blank line
+            yield f"data: {chunk}\n\n"
+
+    return StreamingResponse(event_stream(), media_type="text/event-stream")
 
 
 @app.get("/health")

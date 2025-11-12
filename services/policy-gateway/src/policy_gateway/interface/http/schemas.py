@@ -31,3 +31,15 @@ class DecisionResponse(BaseModel):
 class CiCheckResponse(BaseModel):
     status: str
     violations: list[str] = Field(default_factory=list)
+
+
+class CompletionRequest(BaseModel):
+    prompt: str
+    model: str | None = None
+    max_tokens: int | None = None
+
+
+class CompletionResponse(BaseModel):
+    content: str
+    model: str | None = None
+    usage: Dict[str, object] | None = None

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 
 @dataclass(frozen=True)
@@ -62,3 +62,19 @@ class RulesSnapshot:
 
     def to_dict(self) -> Dict[str, object]:
         return self.raw
+
+
+# --- LLM completion models
+@dataclass(frozen=True)
+class CompletionRequest:
+    prompt: str
+    # optional model selection and extra parameters
+    model: Optional[str] = None
+    max_tokens: Optional[int] = None
+
+
+@dataclass(frozen=True)
+class CompletionResponse:
+    content: str
+    model: Optional[str] = None
+    usage: Dict[str, object] = field(default_factory=dict)

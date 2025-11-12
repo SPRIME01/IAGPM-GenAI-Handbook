@@ -12,7 +12,7 @@ paths:
     get:
       summary: Liveness/Readiness
       responses:
-        '200':
+        "200":
           description: OK
           content:
             application/json:
@@ -22,7 +22,7 @@ paths:
     get:
       summary: Current effective rules/thresholds (merged)
       responses:
-        '200':
+        "200":
           description: Ruleset
           content:
             application/json:
@@ -38,14 +38,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/PromptCheckRequest'
+              $ref: "#/components/schemas/PromptCheckRequest"
       responses:
-        '200':
+        "200":
           description: Decision
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FilterDecision'
+                $ref: "#/components/schemas/FilterDecision"
 
   /filter/output:
     post:
@@ -55,14 +55,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/OutputCheckRequest'
+              $ref: "#/components/schemas/OutputCheckRequest"
       responses:
-        '200':
+        "200":
           description: Decision
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/FilterDecision'
+                $ref: "#/components/schemas/FilterDecision"
 
   /ci/check:
     post:
@@ -72,14 +72,31 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CiCheckRequest'
+              $ref: "#/components/schemas/CiCheckRequest"
       responses:
-        '200':
+        "200":
           description: Result
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CiCheckResponse'
+                $ref: "#/components/schemas/CiCheckResponse"
+
+  /proxy/completion:
+    post:
+      summary: Proxy a completion request to the configured LLM after policy checks
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CompletionRequest"
+      responses:
+        "200":
+          description: Completion response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CompletionResponse"
 
 components:
   schemas:
@@ -118,7 +135,8 @@ components:
       required: [quality, fairness, safety, drift]
       properties:
         quality: { type: object, properties: { pass_at_5: { type: number } } }
-        fairness: { type: object, properties: { subgroup_delta: { type: number } } }
+        fairness:
+          { type: object, properties: { subgroup_delta: { type: number } } }
         safety: { type: object, properties: { harmful_rate: { type: number } } }
         drift: { type: object, properties: { psi: { type: number } } }
     CiCheckResponse:
@@ -128,3 +146,18 @@ components:
         violations:
           type: array
           items: { type: string }
+    CompletionRequest:
+      type: object
+      required: [prompt]
+      properties:
+        prompt: { type: string }
+        model: { type: string }
+        max_tokens: { type: integer }
+    CompletionResponse:
+      type: object
+      properties:
+        content: { type: string }
+        model: { type: string }
+        usage:
+          type: object
+          additionalProperties: true

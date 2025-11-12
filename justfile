@@ -22,3 +22,7 @@ deploy-vllm-with-gateway:
     helm upgrade --install policy-gateway ./deploy/policy-gateway \
       -f deploy/policy-gateway/values.yaml
     kubectl apply -f deploy/policy-gateway/service.yaml
+
+dev-setup:
+    # Creates/activates .venv and runs linter + tests via scripts/dev_setup.sh
+    ./scripts/dev_setup.sh

@@ -141,6 +141,82 @@ curl -X POST http://localhost:8081/filter/prompt \
 # Expected: {"allowed":true,"action":"safe_mode","reasons":["high jailbreak score"]}
 ```
 
+### Developer convenience
+
+For a one-command developer setup that creates a local `.venv`, installs dev dependencies, runs the linter and tests, you can use the helper target:
+
+```bash
+just dev-setup
+```
+
+This runs `scripts/dev_setup.sh` (which prefers `uv` if available, falling back to `python3 -m venv` + `pip`).
+
+### LiteLLM / vLLM proxy
+
+This repository includes a small adapter pattern for connecting the Policy Gateway to LLM providers via a lightweight adapter layer (LiteLLM). The gateway exposes a proxy endpoint that forwards completion requests to an upstream LLM after policy checks:
+
+- POST /proxy/completion — accepts a JSON body `{ "prompt": "...", "model": "..." }` and returns `{ "content": "...", "model": "...", "usage": {...} }`.
+
+Configuration:
+
+- `PAC_UPSTREAM_URL` — base URL of your LLM service (defaults to `http://localhost:8000`). The HTTP adapter forwards requests to `${PAC_UPSTREAM_URL}/completion` by default.
+
+Provider selection & streaming
+------------------------------
+
+You can select the LLM adapter used by the Policy Gateway at runtime via the
+`PAC_LLM_PROVIDER` environment variable. Supported values:
+
+- `http` (default) — forward to an upstream HTTP LLM endpoint (uses
+  `PAC_UPSTREAM_URL`).
+- `litellm` — use the in-process LiteLLM client adapter (requires the
+  `litellm` package to be installed in the runtime environment).
+
+Examples:
+
+```bash
+# Use the HTTP forwarder (default)
+export PAC_LLM_PROVIDER=http
+export PAC_UPSTREAM_URL=http://localhost:8000
+
+# Use the litellm adapter (requires litellm installed in the venv/container)
+export PAC_LLM_PROVIDER=litellm
+```
+
+Streaming endpoint (SSE)
+------------------------
+
+The gateway exposes a Server-Sent-Events endpoint for streaming completions:
+
+- POST /proxy/completion/stream — returns `text/event-stream` chunks where each
+  chunk is prefixed with `data: ` and terminated by a blank line.
+
+Curl example (reads the full stream until the server closes the connection):
+
+```bash
+curl -N -H "Content-Type: application/json" \
+  -X POST http://localhost:8081/proxy/completion/stream \
+  -d '{"prompt":"Write a short poem","model":"gpt-mock"}'
+```
+
+JavaScript EventSource example (browser or Node w/ EventSource polyfill):
+
+```javascript
+const es = new EventSource('/proxy/completion/stream', { method: 'POST', body: JSON.stringify({ prompt: 'Hi' }) });
+es.onmessage = (e) => console.log('chunk:', e.data);
+es.onerror = (err) => { console.error(err); es.close(); };
+```
+
+Note: Some EventSource clients don't support POST natively — for browser
+clients prefer using fetch with ReadableStream or a small SSE helper that
+establishes a streaming GET connection to a specially implemented proxy when
+needed. The curl example above demonstrates a low-friction test of the
+endpoint.
+
+Testing:
+
+- The test suite includes an integration test that spins up a lightweight mock HTTP server to simulate a vLLM backend and asserts the gateway forwards requests and returns the backend response (`services/policy-gateway/tests/test_llm_proxy.py`).
+
 ### Production Deployment (Kubernetes)
 
 ```bash
@@ -158,7 +234,7 @@ kubectl get pods -l app=policy-gateway
 kubectl logs -f deployment/policy-gateway -c policy-gateway
 ```
 
-**⚠️ Production Checklist:** See [`docs/PROJECT_STATE.md`](docs/PROJECT_STATE.md) for:
+**⚠️ Production Checklist:** See [`PROJECT_STATE.md`](docs/Reference/PROJECT_STATE.md) for:
 
 - Secret management (API keys, webhook secrets)
 - StorageClass configuration for PVCs
@@ -250,7 +326,7 @@ POST /filter/prompt
 | [Technical Reference](docs/IAGPM_GenAI_Handbook/Reference.md) | Engineers | API specs, configuration details |
 | [LLMOps Runbook](docs/IAGPM_GenAI_Handbook/Technical/llmops_reference_runbook.md) | MLOps teams | SLOs, monitoring, incident response |
 | [Policy-as-Code Starter](docs/IAGPM_GenAI_Handbook/Technical/policy_as_code_starter.md) | Governance leads | Rule syntax, evaluation matrix |
-| [Project State & Roadmap](docs/PROJECT_STATE.md) | Contributors | TODOs, expert guidance needed |
+| [Project State & Roadmap](docs/Reference/PROJECT_STATE.md) | Contributors | TODOs, expert guidance needed |
 | [Testing Guide](tests/TESTING_GUIDE.md) | Developers | Unit/integration/e2e test patterns |
 
 **Full handbook:** [`docs/IAGPM_GenAI_Handbook/`](docs/IAGPM_GenAI_Handbook/)
@@ -342,7 +418,7 @@ POST /filter/prompt
 - [ ] OpenTelemetry distributed tracing
 - [ ] Runbook automation
 
-**See [`docs/PROJECT_STATE.md`](docs/PROJECT_STATE.md) for detailed implementation plan.**
+**See [`PROJECT_STATE.md`](docs/Reference/PROJECT_STATE.md) for detailed implementation plan.**
 
 ---
 

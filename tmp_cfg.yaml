@@ -1,0 +1,4 @@
+thresholds:
+  quality:
+    pass_at_5:
+      target: 0.82
