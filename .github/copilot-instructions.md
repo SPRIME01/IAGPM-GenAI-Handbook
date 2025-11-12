@@ -2,111 +2,116 @@
 
 ## Project Overview
 
-This is an **Integrated AI Governance & Project Management System (IAGPM-GenAI)** - a production-ready framework demonstrating "governed speed": deploying GenAI safely while maintaining compliance with NIST AI RMF, ISO 42001, and EU AI Act.
+**IAGPM-GenAI**: Production-ready AI governance framework demonstrating "governed speed"—deploying GenAI safely while maintaining compliance with NIST AI RMF, ISO 42001, and EU AI Act.
 
-**Core Architecture**: Policy-as-Code enforcement gateway + Risk & Evidence Service (RES) + Observability stack
+**Architecture**: Policy Gateway (runtime sidecar) + Risk & Evidence Service + Observability stack enforcing `adr-006.embedded-governance.yaml` thresholds.
 
-## Critical Components
+## Critical Architecture Patterns
 
-### 1. Policy Gateway (`services/policy-gateway/`)
+### Hexagonal Architecture (Policy Gateway)
 
-- **Purpose**: Runtime sidecar enforcing Policy-as-Code rules from `adr-006.embedded-governance.yaml`
-- **Key Pattern**: Loads YAML/JSON config at startup, evaluates prompt/output filters via simple rule engine
-- **Decision Actions**: `block`, `safe_mode`, `summarize`, `allow`
-- **Deployment**: Runs as sidecar container alongside vLLM (see `charts/policy-gateway/templates/deployment.yaml`)
+**Structure**: `services/policy-gateway/src/policy_gateway/`
 
-### 2. Risk & Evidence Service (`services/risk-evidence-service/`)
+```
+ports/          → Interfaces (ConfigurationPort Protocol)
+application/    → Service layer (PolicyDecisionService)
+domain/         → Models (DecisionResult, CiCheckInput, etc.)
+infrastructure/ → Adapters (ConfigFileAdapter)
+interface/      → HTTP schemas (Pydantic models)
+```
 
-- **Purpose**: Collect evaluation artifacts, expose Prometheus metrics, provide compliance snapshots
-- **Storage**: Writes evidence as JSON files to `STORAGE_PATH` with SHA256 hashing
-- **Metrics**: Exposes `llm_pass_at_5`, `fairness_subgroup_delta`, `harmful_output_rate`, `drift_psi` via `/metrics`
-- **Key Endpoints**: `POST /evidence`, `GET /risk/snapshot`, `POST /incident`
+**Dependency Flow**: `app.py` (FastAPI) → `PolicyDecisionService` → `ConfigurationPort` ← `ConfigFileAdapter`
 
-### 3. ADR-006 Configuration (`policies/adr-006.embedded-governance.yaml`)
+**Key Principle**: Domain logic in `application/services.py` knows nothing about FastAPI, file I/O, or YAML parsing. All I/O goes through ports.
 
-- **Single Source of Truth** for thresholds and policy rules
-- **Structure**: `meta` → `frameworks` → `ownership` → `policy_as_code.rules` → `thresholds`
-- **Thresholds Example**: `quality.pass_at_5.target: 0.82`, `fairness.subgroup_delta.target_max: 0.05`
-- **Mounted**: As ConfigMap in both gateway and RES containers
+### Domain-to-HTTP Response Conversion Pattern
 
-## Development Workflows
+**Current fragile pattern** (being refactored):
 
-### Local Development Stack
+```python
+# ❌ AVOID: Relies on __dict__ matching exactly
+return DecisionResponse(**decision.__dict__)
+```
+
+**Correct pattern** (explicit field mapping):
+
+```python
+# ✅ Use explicit conversion
+return DecisionResponse(
+    allowed=decision.allowed,
+    action=decision.action,
+    reasons=decision.reasons,
+    metadata=decision.metadata or {}
+)
+```
+
+**Why**: Domain models (`DecisionResult`) may diverge from HTTP schemas (`DecisionResponse`). Explicit mapping prevents runtime errors.
+
+### Configuration Single Source of Truth
+
+**File**: `policies/adr-006.embedded-governance.yaml`
+**Mounted as**: Kubernetes ConfigMap → `/config/adr-006.embedded-governance.yaml` in containers
+
+**Critical sections**:
+
+- `thresholds.quality.pass_at_5.target: 0.82`
+- `thresholds.fairness.subgroup_delta.target_max: 0.05`
+- `policy_as_code.rules[]` → Enforced by `PolicyDecisionService.decide_prompt()`
+
+**Update workflow**:
+
+1. Edit `policies/adr-006.embedded-governance.yaml`
+2. Recreate ConfigMap: `kubectl delete configmap adr-006-config && kubectl create configmap...`
+3. Restart pods: `kubectl rollout restart deployment/policy-gateway`
+
+## Essential Development Workflows
+
+### Local Development
 
 ```bash
-# Always use devbox for reproducible environment
-devbox shell
-
-# Start full stack (Prometheus + Grafana + pgvector + services)
+devbox shell  # ALWAYS use for reproducible environment
 docker compose -f deployments/docker-compose.yml up --build
 
-# Access:
-# - Grafana: http://localhost:3000 (admin/admin)
-# - RES API: http://localhost:8080/health
-# - Gateway: http://localhost:8081/health
-# - Viewer: http://localhost:8501
+# Services:
+# Gateway: http://localhost:8081/health
+# RES:     http://localhost:8080/health
+# Grafana: http://localhost:3000 (admin/admin)
 ```
 
 ### Pre-Commit Governance Gate
 
 ```bash
-# Run BEFORE pushing code - enforces thresholds locally
-just ci-check
+just ci-check  # Validates quality/fairness/safety/drift metrics
 
-# Requires evaluation artifacts in artifacts/ directory:
-# - eval_quality.json (must have pass_at_5)
-# - eval_fairness.json (must have subgroup_delta)
-# - eval_safety.json (must have harmful_rate)
-# - eval_drift.json (must have psi)
+# Requires artifacts/ with:
+# - eval_quality.json    (pass_at_5)
+# - eval_fairness.json   (subgroup_delta)
+# - eval_safety.json     (harmful_rate)
+# - eval_drift.json      (psi)
 ```
 
-**Tool**: `tools/pac_ci.py` reads `adr-006.embedded-governance.yaml` and validates metrics against thresholds. Exit code 1 = violations found.
+**Tool**: `tools/pac_ci.py` reads thresholds from `adr-006.embedded-governance.yaml`, exits 1 if violated.
 
-### Kubernetes Deployment
+### Testing (Currently Manual—Automation Needed)
+
+**No formal test suite exists yet.** See `tests/TESTING_GUIDE.md` for recommended structure.
+
+**Manual validation**:
 
 ```bash
-# 1. Create ADR-006 ConfigMap
-kubectl create configmap adr-006-config \
-  --from-file=adr-006.embedded-governance.yaml=./policies/adr-006.embedded-governance.yaml \
-  -n default
+# Test gateway decision logic
+curl -X POST http://localhost:8081/filter/prompt \
+  -H "Content-Type: application/json" \
+  -d '{"prompt":"test","context":{"jailbreak_score":0.9}}'
 
-# 2. Deploy via Helm
-helm upgrade --install policy-gateway ./charts/policy-gateway -n default
-helm upgrade --install risk-evidence-service ./charts/risk-evidence-service -n default
+# Expected: {"action":"safe_mode",...}
 ```
 
-### Helm Chart Configuration
-
-**Key Values** (see `charts/*/templates/values.yaml`):
-
-**Policy Gateway**:
-
-- `image.repository`: Container registry path (default: `ghcr.io/your-org/policy-gateway`)
-- `targetApp.labels`: Pod selector for vLLM co-location (default: `app: vllm`)
-- `targetApp.vllmPort`: vLLM container port (default: `8000`)
-- `config.adrConfigCM`: ConfigMap name for ADR-006 (default: `adr-006-config`)
-- `resources.limits.memory`: Gateway memory limit (default: `512Mi`)
-
-**Risk & Evidence Service**:
-
-- `storage.size`: PVC size for evidence storage (default: `2Gi`)
-- `storage.className`: StorageClass for PVC (set for your cluster)
-- `env.STORAGE_PATH`: Evidence file path (default: `/evidence`)
-- `ingress.enabled`: Expose RES externally (default: `false`)
-- `ingress.host`: DNS for external access (example: `res.localdev`)
-
-**TODO - Expert Guidance**:
-
-- Document recommended StorageClass for production (e.g., `gp3` on EKS, `pd-ssd` on GKE)
-- Add secret management pattern for `INCIDENT_WEBHOOK_SECRET` (use SealedSecrets, Vault, or cloud-native solutions)
-- Specify OCI registry setup for pushing charts (`helm push` to GHCR or Harbor)
-- Add NetworkPolicy examples for restricting gateway→vLLM and RES→pgvector traffic
+**TODO**: Create `tests/unit/test_policy_service.py` following pytest patterns in `TESTING_GUIDE.md`.
 
 ## Project-Specific Conventions
 
-### Configuration Loading Pattern
-
-Both services use identical config loading:
+### Config Loading (Both Services)
 
 ```python
 def load_cfg():
@@ -115,225 +120,100 @@ def load_cfg():
     return json.load(open(CFG_PATH))
 ```
 
-**Always** support both YAML and JSON formats.
+**Always support YAML and JSON.**
 
-### Environment Variables Standard
+### Environment Variables
 
-- `PAC_CONFIG`: Path to adr-006 config (default: `/config/adr-006.embedded-governance.yaml`)
+- `PAC_CONFIG`: Config path (default: `/config/adr-006.embedded-governance.yaml`)
 - `PAC_UPSTREAM_URL`: vLLM endpoint for gateway (default: `http://localhost:8000`)
-- `STORAGE_PATH`: Evidence storage location (default: `/evidence`)
+- `STORAGE_PATH`: Evidence storage (default: `/evidence`)
 
 ### Sidecar Deployment Pattern
 
-The Policy Gateway runs as a **sidecar** container in the same pod as vLLM:
+Gateway runs as sidecar alongside vLLM in same pod (see `charts/policy-gateway/templates/deployment.yaml`):
 
-- Gateway listens on port 8081
-- vLLM listens on configured `vllmPort` (e.g., 8000)
-- Gateway proxies to `http://localhost:{vllmPort}`
-- See `charts/policy-gateway/templates/deployment.yaml` for the two-container pattern
-
-### vLLM Integration
-
-**TODO - Expert Guidance Needed**:
-
-- **Current**: Mock vLLM using `http-echo` container in docker-compose
-- **Production Pattern**:
-  - Use official vLLM image: `vllm/vllm-openai:latest` or specific version
-  - Mount model weights via PVC or S3-compatible storage
-  - Configure `--model` flag to point to Hugging Face model or local path
-  - Set `--api-key` for authentication (store in Kubernetes Secret)
-  - Gateway should forward `Authorization: Bearer <token>` headers
-  - Example deployment:
-    ```yaml
-    containers:
-      - name: vllm
-        image: vllm/vllm-openai:v0.6.0
-        command: ["python", "-m", "vllm.entrypoints.openai.api_server"]
-        args:
-          - --model=/models/llama-3-8b
-          - --port=8000
-          - --api-key=$(VLLM_API_KEY)
-        volumeMounts:
-          - name: model-storage
-            mountPath: /models
-    ```
-- **Recommended**: Test with small models like `microsoft/phi-2` or `TinyLlama/TinyLlama-1.1B-Chat-v1.0` before scaling
-- **See**: `docker-compose.yml` vllm-mock service for current mock setup
+- Gateway: port 8081
+- vLLM: port 8000 (configurable via `targetApp.vllmPort`)
+- Gateway proxies to `http://localhost:{vllmPort}` after policy checks
 
 ### Evidence Hashing Convention
 
-When storing evidence, always use SHA256 of sorted JSON:
-
 ```python
+# Always use SHA256 of sorted JSON for reproducible audit hashes
 h = hashlib.sha256(json.dumps(content, sort_keys=True).encode()).hexdigest()
 ```
 
-This ensures reproducible hashes for audit trails.
+## Critical Code Patterns
 
-## Key Files to Reference
+### Domain → HTTP Response Conversion
 
-- **`docs/IAGPM_GenAI_Handbook/Technical/policy_as_code_starter.md`**: Policy rule syntax and enforcement patterns
-- **`docs/IAGPM_GenAI_Handbook/Technical/llmops_reference_runbook.md`**: SLOs, gates, incident response flow
-- **`specs/openapi-policy-gateway.yaml`**: Complete API contract for gateway
-- **`specs/openapi-risk-evidence-service.yaml`**: Complete API contract for RES
-- **`observability/grafana/dashboards/dashboard-governed-speed.json`**: Pre-built Grafana dashboard
-
-## Adding New Policy Rules
-
-1. Edit `policies/adr-006.embedded-governance.yaml` → `policy_as_code.rules[]`
-2. Add rule with: `id`, `description`, `when` (condition), `action`, `owner`
-3. Implement decision logic in `services/policy-gateway/src/app.py` → `decide_prompt()` or `decide_output()`
-4. Update ConfigMap: `kubectl delete configmap adr-006-config && kubectl create...`
-5. Restart gateway: `kubectl rollout restart deployment/policy-gateway`
-
-## Testing Strategy
-
-### Recommended Test Structure
-
-Create tests following this pattern:
-
-```
-tests/
-├── unit/
-│   ├── test_policy_gateway.py    # Test decide_prompt/decide_output logic
-│   ├── test_res_storage.py        # Test evidence hashing/storage
-│   └── test_pac_ci.py             # Test threshold validation
-├── integration/
-│   ├── test_gateway_api.py        # FastAPI TestClient for /filter endpoints
-│   ├── test_res_api.py            # Test POST /evidence, GET /risk/snapshot
-│   └── test_docker_compose.py     # Health checks on all services
-└── fixtures/
-    ├── adr-006.test.yaml          # Test config with known thresholds
-    └── mock_artifacts/            # Sample eval JSONs for ci-check
-```
-
-### Unit Testing Pattern (pytest)
+**Active refactoring in progress** - replace fragile `**decision.__dict__` patterns with explicit mapping:
 
 ```python
-# tests/unit/test_policy_gateway.py
-import pytest
-from services.policy_gateway.src.app import decide_prompt, PromptCheckRequest
+# ❌ Fragile - breaks if domain/HTTP models diverge
+return DecisionResponse(**decision.__dict__)
 
-def test_pii_without_lawful_basis_blocks():
-    cfg = {"policy_as_code": {"rules": [...]}}  # Load from fixtures
-    req = PromptCheckRequest(
-        prompt="Contact John at john@example.com",
-        context={"contains_pii": True, "lawful_basis": False}
-    )
-    result = decide_prompt(req, cfg)
-    assert result["action"] == "block"
-    assert "PII without lawful basis" in result["reasons"]
+# ✅ Explicit - safe and maintainable
+return DecisionResponse(
+    allowed=decision.allowed,
+    action=decision.action,
+    reasons=decision.reasons,
+    metadata=decision.metadata or {}
+)
 ```
 
-### Integration Testing (Docker Compose)
+### Protocol Method Stubs
 
 ```python
-# tests/integration/test_gateway_api.py
-import pytest
-import requests
+# ❌ Incorrect for Protocol
+def load(self) -> dict:
+    raise NotImplementedError
 
-@pytest.fixture(scope="module")
-def gateway_url():
-    # Assumes docker-compose up running
-    return "http://localhost:8081"
-
-def test_filter_prompt_endpoint(gateway_url):
-    resp = requests.post(f"{gateway_url}/filter/prompt", json={
-        "prompt": "test",
-        "context": {"jailbreak_score": 0.9}
-    })
-    assert resp.status_code == 200
-    assert resp.json()["action"] == "safe_mode"
+# ✅ Use ellipsis for type checking
+def load(self) -> dict:
+    ...
 ```
 
-### Mock Evaluation Artifacts
+**Fix needed**: `services/policy-gateway/src/policy_gateway/ports/configuration.py` line 9-12.
 
-Create `tests/fixtures/mock_artifacts/` for `just ci-check`:
+### Duplicate Code Detection
 
-```bash
-mkdir -p tests/fixtures/mock_artifacts
-cat > tests/fixtures/mock_artifacts/eval_quality.json <<'EOF'
-{"pass_at_5": 0.84, "pass_at_1": 0.72}
-EOF
+**Known issue**: `ConfigFileAdapter.load()` has incomplete duplicate starting at line 18. Remove the partial try block, keep only the complete implementation at line 24.
 
-cat > tests/fixtures/mock_artifacts/eval_fairness.json <<'EOF'
-{"subgroup_delta": 0.03, "demographic_parity": 0.95}
-EOF
+## Testing (Critical Gap - P0)
 
-cat > tests/fixtures/mock_artifacts/eval_safety.json <<'EOF'
-{"harmful_rate": 0.002, "jailbreak_success": 0.0}
-EOF
+**Current state**: No automated tests exist. Manual validation only.
 
-cat > tests/fixtures/mock_artifacts/eval_drift.json <<'EOF'
-{"psi": 0.08, "kl_divergence": 0.05}
-EOF
-```
+**Immediate needs**:
 
-Then test locally:
+1. Unit tests for `PolicyDecisionService` decision logic
+2. Integration tests for FastAPI endpoints
+3. Fix missing `ConfigurationPort` import in `tests/test_policy_service.py` line 13
 
-```bash
-python tools/pac_ci.py \
-  --config policies/adr-006.embedded-governance.yaml \
-  --eval tests/fixtures/mock_artifacts/eval_quality.json \
-  --fairness tests/fixtures/mock_artifacts/eval_fairness.json \
-  --safety tests/fixtures/mock_artifacts/eval_safety.json \
-  --drift tests/fixtures/mock_artifacts/eval_drift.json
-```
+See `tests/TESTING_GUIDE.md` for full patterns and `tests/fixtures/` for mock data examples.
 
-**Current State**: No formal test suite exists yet - validation happens via:
+## Key Reference Files
 
-- Docker Compose integration testing (manual)
-- `just ci-check` for threshold validation
-- Manual API testing via curl/Postman against OpenAPI specs
-- GitHub Actions workflow at `.github/workflows/governed-speed-ci.yml`
-
-## Observability
-
-### Prometheus Metrics
-
-RES exposes standard Prometheus client metrics at `/metrics`:
-
-- `res_evidence_events_total` (Counter)
-- `llm_pass_at_5` (Gauge)
-- `fairness_subgroup_delta` (Gauge)
-- `harmful_output_rate` (Gauge)
-- `drift_psi` (Gauge)
-
-Scrape config: `observability/prometheus/prometheus.yml`
-
-### Grafana Dashboard
-
-Pre-provisioned dashboard at `observability/grafana/dashboards/dashboard-governed-speed.json` shows:
-
-- Quality/Fairness/Safety/Drift metrics vs thresholds
-- Evidence submission timeline
-- Incident tracking
-
-## Documentation Framework
-
-The `docs/IAGPM_GenAI_Handbook/` follows **Diátaxis** structure:
-
-- **Tutorial**: Step-by-step learning
-- **Howto**: Task-oriented guides
-- **Reference**: Technical specifications
-- **Explanation**: Conceptual understanding
-
-When updating docs, respect this separation of concerns.
+- **`policies/adr-006.embedded-governance.yaml`**: Single source of truth for thresholds/rules
+- **`docs/IAGPM_GenAI_Handbook/Technical/policy_as_code_starter.md`**: Policy rule syntax
+- **`specs/openapi-policy-gateway.yaml`**: Gateway API contract
+- **`specs/openapi-risk-evidence-service.yaml`**: RES API contract
+- **`docs/PROJECT_STATE.md`**: TODO tracker, gaps, expert guidance needed
 
 ## Common Pitfalls
 
-1. **ConfigMap Updates**: Changes to `adr-006.embedded-governance.yaml` require ConfigMap recreation + pod restart
-2. **Port Confusion**: Gateway runs on 8081, vLLM on 8000, RES on 8080 - don't mix them
-3. **Devbox Required**: Without `devbox shell`, Python/kubectl/helm versions may mismatch
-4. **Evaluation Artifacts**: `just ci-check` fails silently if artifacts/ directory missing - create mock JSONs for testing
+1. **ConfigMap updates**: Editing `adr-006.embedded-governance.yaml` requires `kubectl delete configmap adr-006-config && kubectl create...` + pod restart
+2. **Port confusion**: Gateway=8081, vLLM=8000, RES=8080
+3. **Missing artifacts/**: `just ci-check` expects eval JSONs in `artifacts/` directory
+4. **Devbox shell**: Always run `devbox shell` first for correct Python/tool versions
 
-## Framework Alignment
+## Framework Compliance
 
-All work must align with:
+All changes must align with:
 
-- **CPMAI+E**: Phases I-VI (see `policies/adr-006.embedded-governance.yaml` → `frameworks.cpmai_e`)
-- **NIST AI RMF**: Govern-Map-Measure-Manage functions
-- **ISO 42001**: AIMS components (Context through Improvement)
-- **EU AI Act**: Risk tier classification (default: "Limited")
+- **NIST AI RMF** (Govern-Map-Measure-Manage)
+- **ISO 42001** (AIMS phases)
+- **EU AI Act** (risk tier = "Limited" default)
+- **CPMAI+E** phases I-VI
 
-When adding features, reference the appropriate framework phase/component in commit messages and ADRs.
+See `policies/adr-006.embedded-governance.yaml` → `frameworks` section for mappings.

@@ -156,6 +156,22 @@ It’s written for **real-world usability** by both technical agents and human r
 
 ---
 
+## Update: LLM adapter & streaming (2025-11-12)
+
+Added runtime wiring for pluggable LLM adapters and a streaming proxy API.
+
+- New environment variable: `PAC_LLM_PROVIDER` — controls which adapter the
+   Policy Gateway uses at runtime. Supported values:
+   - `http` (default) — forward to an upstream vLLM-like HTTP endpoint
+   - `litellm` — use an in-process LiteLLM client adapter when available
+
+- New streaming endpoint (SSE): `POST /proxy/completion/stream` — returns
+   Server-Sent-Event formatted chunks from the selected adapter's streaming
+   API (useful for low-latency partial responses and UI streaming).
+
+These additions let runtime deployments choose providers by environment and
+support streaming without changing application code.
+
 # ADR-006: Embedded AI Governance Integration
 
 **Status:** Accepted

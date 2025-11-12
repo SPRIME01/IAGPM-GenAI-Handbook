@@ -56,7 +56,7 @@ Built to showcase expertise in **LLMOps**, **GenAI program leadership**, and **r
 
 ## 🏗️ Architecture Overview
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │  Developer Workflow (Governed Speed in Action)              │
 ├─────────────────────────────────────────────────────────────┤
@@ -103,58 +103,163 @@ Built to showcase expertise in **LLMOps**, **GenAI program leadership**, and **r
 
 ### Prerequisites
 
-- Docker & Docker Compose
-- (Optional) `devbox` for reproducible environment
-- (Optional) Kubernetes cluster for production deployment
+- **Required:** Docker & Docker Compose
+- **Recommended:** `devbox` for reproducible environment ([install guide](https://www.jetpack.io/devbox))
+- **Production:** Kubernetes cluster + Helm 3
 
 ### Local Demo (5 minutes)
 
 ```bash
-# 1. Clone repository
-git clone https://github.com/SPRIME01/IAGPM-GenAI-Handbook.git
-cd IAGPM-GenAI-Handbook
+# 1. Clone and enter reproducible environment
+git clone https://github.com/SPRIME01/GovernedSpeed.git
+cd GovernedSpeed
+devbox shell  # Provides Python 3.11, kubectl, helm, just
 
-# 2. (Optional) Use reproducible toolchain
-devbox shell
-
-# 3. Validate governance thresholds locally
-just ci-check
-
-# 4. Start full stack (Prometheus + Grafana + Services)
+# 2. Start full stack
 docker compose -f deployments/docker-compose.yml up --build
 
-# 5. Access interfaces
-# - Grafana Dashboard:  http://localhost:3000 (admin/admin)
-# - Policy Gateway API: http://localhost:8081/health
-# - RES API:            http://localhost:8080/health
-# - Prometheus:         http://localhost:9090
-# - Evidence Viewer:    http://localhost:8501
+# 3. Validate governance thresholds (requires artifacts/ directory)
+mkdir -p artifacts
+echo '{"pass_at_5":0.84}' > artifacts/eval_quality.json
+echo '{"subgroup_delta":0.03}' > artifacts/eval_fairness.json
+echo '{"harmful_rate":0.002}' > artifacts/eval_safety.json
+echo '{"psi":0.08}' > artifacts/eval_drift.json
+just ci-check  # Exit 0 = passed, 1 = violations
+
+# 4. Access services
+# Gateway: http://localhost:8081/health
+# RES:     http://localhost:8080/health
+# Grafana: http://localhost:3000 (admin/admin)
 ```
 
-**What you'll see:**
+**Test the policy gateway:**
 
-- Pre-built Grafana dashboard showing quality/fairness/safety metrics vs. thresholds
-- Policy Gateway filtering prompts based on PII detection, jailbreak scores
-- Risk & Evidence Service collecting audit trails with cryptographic hashing
-- Automated threshold validation (quality ≥ 82%, fairness delta ≤ 5%, safety violations ≤ 0.5%)
+```bash
+curl -X POST http://localhost:8081/filter/prompt \
+  -H "Content-Type: application/json" \
+  -d '{"prompt":"test","context":{"jailbreak_score":0.9}}'
+# Expected: {"allowed":true,"action":"safe_mode","reasons":["high jailbreak score"]}
+```
+
+### Developer convenience
+
+For a one-command developer setup that creates a local `.venv`, installs dev dependencies, runs the linter and tests, you can use the helper target:
+
+```bash
+just dev-setup
+```
+
+This runs `scripts/dev_setup.sh` (which prefers `uv` if available, falling back to `python3 -m venv` + `pip`).
+
+### LiteLLM / vLLM proxy
+
+This repository includes a small adapter pattern for connecting the Policy Gateway to LLM providers via a lightweight adapter layer (LiteLLM). The gateway exposes a proxy endpoint that forwards completion requests to an upstream LLM after policy checks:
+
+- POST /proxy/completion — accepts a JSON body `{ "prompt": "...", "model": "..." }` and returns `{ "content": "...", "model": "...", "usage": {...} }`.
+
+Configuration:
+
+- `PAC_UPSTREAM_URL` — base URL of your LLM service (defaults to `http://localhost:8000`). The HTTP adapter forwards requests to `${PAC_UPSTREAM_URL}/completion` by default.
+
+Provider selection & streaming
+------------------------------
+
+You can select the LLM adapter used by the Policy Gateway at runtime via the
+`PAC_LLM_PROVIDER` environment variable. Supported values:
+
+- `http` (default) — forward to an upstream HTTP LLM endpoint (uses
+  `PAC_UPSTREAM_URL`).
+- `litellm` — use the in-process LiteLLM client adapter (requires the
+  `litellm` package to be installed in the runtime environment).
+
+Examples:
+
+```bash
+# Use the HTTP forwarder (default)
+export PAC_LLM_PROVIDER=http
+export PAC_UPSTREAM_URL=http://localhost:8000
+
+# Use the litellm adapter (requires litellm installed in the venv/container)
+export PAC_LLM_PROVIDER=litellm
+```
+
+Streaming endpoint (SSE)
+------------------------
+
+The gateway exposes a Server-Sent-Events endpoint for streaming completions:
+
+- POST /proxy/completion/stream — returns `text/event-stream` chunks where each
+  chunk is prefixed with `data: ` and terminated by a blank line.
+
+Curl example (reads the full stream until the server closes the connection):
+
+```bash
+curl -N -H "Content-Type: application/json" \
+  -X POST http://localhost:8081/proxy/completion/stream \
+  -d '{"prompt":"Write a short poem","model":"gpt-mock"}'
+```
+
+JavaScript streaming examples (browser)
+
+Native EventSource only supports GET requests. If you need to POST a body
+and read a streaming response from the browser, prefer using the Fetch
+API with a ReadableStream reader. Example:
+
+```javascript
+// POST and read streaming response using fetch + ReadableStream
+async function streamCompletion() {
+  const resp = await fetch('/proxy/completion/stream', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ prompt: 'Hi' }),
+  });
+
+  if (!resp.body) throw new Error('No streaming body on response');
+  const reader = resp.body.getReader();
+  const decoder = new TextDecoder();
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    const chunk = decoder.decode(value, { stream: true });
+    console.log('chunk:', chunk);
+  }
+}
+
+streamCompletion().catch((err) => console.error('stream error', err));
+```
+
+If you specifically want an EventSource-style API and are willing to add a
+small polyfill, you can use a library such as `event-source-polyfill` in
+Node/browser environments that require POST/advanced behavior — but be
+explicit: native EventSource is GET-only.
+
+Testing:
+
+- The test suite includes an integration test that spins up a lightweight mock HTTP server to simulate a vLLM backend and asserts the gateway forwards requests and returns the backend response (`services/policy-gateway/tests/test_llm_proxy.py`).
 
 ### Production Deployment (Kubernetes)
 
 ```bash
-# 1. Create policy configuration
+# 1. Create ADR-006 ConfigMap
 kubectl create configmap adr-006-config \
-  --from-file=policies/adr-006.embedded-governance.yaml
+  --from-file=adr-006.embedded-governance.yaml=./policies/adr-006.embedded-governance.yaml \
+  -n default
 
 # 2. Deploy via Helm
-helm upgrade --install policy-gateway ./charts/policy-gateway
-helm upgrade --install risk-evidence-service ./charts/risk-evidence-service
+helm upgrade --install policy-gateway ./charts/policy-gateway -n default
+helm upgrade --install risk-evidence-service ./charts/risk-evidence-service -n default
 
-# 3. Verify deployment
+# 3. Verify
 kubectl get pods -l app=policy-gateway
 kubectl logs -f deployment/policy-gateway -c policy-gateway
 ```
 
-See [`.github/PROJECT_STATE.md`](.github/PROJECT_STATE.md) for production hardening checklist (secret management, StorageClass configuration, vLLM integration).
+**⚠️ Production Checklist:** See [`PROJECT_STATE.md`](docs/Reference/PROJECT_STATE.md) for:
+
+- Secret management (API keys, webhook secrets)
+- StorageClass configuration for PVCs
+- Real vLLM integration (currently mocked)
+- Automated testing setup
 
 ---
 
@@ -237,10 +342,11 @@ POST /filter/prompt
 | Document | Audience | Purpose |
 |----------|----------|---------|
 | [Quick Start Guide](docs/IAGPM_GenAI_Handbook/Quick_Start_Guide.md) | Everyone | 10-minute walkthrough |
+| [AI Agent Instructions](.github/copilot-instructions.md) | AI Assistants | Architecture patterns, workflows |
 | [Technical Reference](docs/IAGPM_GenAI_Handbook/Reference.md) | Engineers | API specs, configuration details |
 | [LLMOps Runbook](docs/IAGPM_GenAI_Handbook/Technical/llmops_reference_runbook.md) | MLOps teams | SLOs, monitoring, incident response |
 | [Policy-as-Code Starter](docs/IAGPM_GenAI_Handbook/Technical/policy_as_code_starter.md) | Governance leads | Rule syntax, evaluation matrix |
-| [Project State & Roadmap](.github/PROJECT_STATE.md) | Contributors | TODOs, expert guidance needed |
+| [Project State & Roadmap](docs/Reference/PROJECT_STATE.md) | Contributors | TODOs, expert guidance needed |
 | [Testing Guide](tests/TESTING_GUIDE.md) | Developers | Unit/integration/e2e test patterns |
 
 **Full handbook:** [`docs/IAGPM_GenAI_Handbook/`](docs/IAGPM_GenAI_Handbook/)
@@ -311,28 +417,28 @@ POST /filter/prompt
 
 **Current State:** MVP with manual validation → Production hardening in progress
 
-**Phase 1 (Weeks 1-2): Production Readiness**
+### Phase 1 (Weeks 1-2): Production Readiness
 
 - [ ] Unit/integration test suite (80%+ coverage)
 - [ ] Secret management (SealedSecrets or ESO)
 - [ ] Production StorageClass configuration
 - [ ] CI enhancements (security scanning, coverage reports)
 
-**Phase 2 (Weeks 3-4): vLLM Integration**
+### Phase 2 (Weeks 3-4): vLLM Integration
 
 - [ ] Real vLLM deployment with GPU support
 - [ ] Model storage strategy (PVC-based)
 - [ ] API key authentication
 - [ ] Autoscaling configuration
 
-**Phase 3 (Weeks 5-6): Observability**
+### Phase 3 (Weeks 5-6): Observability
 
 - [ ] Prometheus alerting rules
 - [ ] Loki log aggregation
 - [ ] OpenTelemetry distributed tracing
 - [ ] Runbook automation
 
-**See [`.github/PROJECT_STATE.md`](.github/PROJECT_STATE.md) for detailed implementation plan.**
+**See [`PROJECT_STATE.md`](docs/Reference/PROJECT_STATE.md) for detailed implementation plan.**
 
 ---
 
@@ -342,10 +448,10 @@ This is a portfolio project demonstrating production-grade AI governance pattern
 
 - Production deployment experiences (cloud provider-specific guidance)
 - Additional policy rule examples
-- Integration with other LLM serving frameworks
-- Compliance framework mappings (SOC 2, HIPAA, etc.)
+- Integration with other LLM serving frameworks (Ollama, TGI, etc.)
+- Compliance framework mappings (SOC 2, HIPAA, FedRAMP, etc.)
 
-See [`.github/copilot-instructions.md`](.github/copilot-instructions.md) for development conventions.
+**Development setup:** See [`.github/copilot-instructions.md`](.github/copilot-instructions.md) for architecture patterns, workflows, and conventions.
 
 ---
 
@@ -366,20 +472,18 @@ See [`.github/copilot-instructions.md`](.github/copilot-instructions.md) for dev
 
 ## 🎤 About This Project
 
-This repository represents a unified vision: **AI governance doesn't have to slow delivery when it's embedded in the delivery process.**
+This repository demonstrates: **AI governance doesn't have to slow delivery when it's embedded in the delivery process.**
 
-It's built to demonstrate:
+**Key Differentiators:**
 
-- **Strategic thinking:** Understanding governance as a business enabler, not a compliance tax
-- **Technical execution:** Production-grade code, not prototypes
-- **Systems integration:** Synthesizing multiple frameworks into a coherent operating model
-- **Operational maturity:** Real monitoring, real incident response, real audit trails
+- **Strategic:** Governance as a business enabler, not a compliance tax
+- **Technical:** Production-grade hexagonal architecture, not prototypes
+- **Integration:** Unified NIST AI RMF + ISO 42001 + EU AI Act implementation
+- **Operational:** Real monitoring, incident response, and audit trails
 
-**For hiring managers:** This is what I bring to your AI initiatives—governance that moves at the speed of innovation.
-
-**For practitioners:** This is a template you can deploy tomorrow, not a whitepaper you'll read and forget.
-
-**For auditors:** This is the evidence trail you wish every AI team maintained.
+**For hiring managers:** Governance that moves at the speed of innovation.
+**For practitioners:** A template you can deploy tomorrow.
+**For auditors:** The evidence trail you wish every AI team maintained.
 
 ---
 
@@ -390,70 +494,46 @@ It's built to demonstrate:
 
 *Demonstrating that the future of AI is governed speed—where safety and velocity reinforce each other.*
 
-> **Next upgrades (optional):**
->
-> - swap `vllm-mock` for a real `vLLM` image and secure it with API keys.
-> - push Helm charts to an OCI registry and deploy the same topology to k3s.
-> - wire your CI to post real eval metrics into the RES, so the Grafana board shows live quality/fairness/safety/drift.
-
--- you can also fully provision dashboard-governed-speed.json via observability/grafana/provisioning/dashboards.yml.
-
-## Automation with Just
-
-- `just ci-check`
-- `just deploy-config`
-- `just deploy-res`
-- `just deploy-vllm-with-gateway`
-
 ---
-This kit is designed to help you get started with a real product repo. Below you’ll find:
 
-a best-practice file structure (with short purpose notes)
+## 🛠️ Just Commands (Automation)
 
-OpenAPI 3.0 specs for the Policy Gateway and Risk & Evidence Service (RES)
+The `justfile` provides shortcuts for common workflows:
 
-Grafana dashboard JSON (governance + runtime)
+```bash
+just ci-check                    # Validate governance thresholds locally
+just deploy-config               # Create ADR-006 ConfigMap in K8s
+just deploy-res                  # Deploy Risk & Evidence Service
+just deploy-vllm-with-gateway    # Deploy Policy Gateway with vLLM
+```
 
-Dockerfiles (Policy Gateway, RES, Streamlit viewer)
-
-a Docker Compose for local, end-to-end demos (Prometheus + Grafana + pgvector + mock vLLM + Gateway + RES + Viewer)
-
-Prometheus scrape config (so the dashboard lights up)
-
-quick run instructions
-
-## Run locally
-
-# If RES exposed locally (port-forward or ingress)
-
-export RES_URL="<http://localhost:8080>"  # or <http://res.localdev>
-
-cd tools/res_viewer
-pip install -r requirements.txt
-streamlit run app.py
+**See [`justfile`](justfile) for full command reference.**
 
 ---
 
-# Ensure adr-006 ConfigMap exists (or let the policy-gateway chart create it and paste contents)
+## 📦 What's Included
 
-kubectl create configmap adr-006-config \
-  --from-file=adr-006.embedded-governance.yaml=./adr-006.embedded-governance.yaml \
-  -n default
+This repository provides a complete production-ready kit:
 
-helm upgrade --install policy-gateway ./charts/policy-gateway -n default
-helm upgrade --install risk-evidence-service ./charts/risk-evidence-service -n default
+- **Architecture:** Hexagonal (ports/adapters) Policy Gateway + Evidence Service
+- **Specs:** OpenAPI 3.0 contracts for both services ([`specs/`](specs/))
+- **Deployment:** Docker Compose (local) + Helm charts (K8s) ([`deployments/`](deployments/), [`charts/`](charts/))
+- **Observability:** Prometheus metrics + pre-built Grafana dashboards ([`observability/`](observability/))
+- **Policy Configuration:** ADR-006 YAML with thresholds/rules ([`policies/`](policies/))
+- **Documentation:** Diátaxis-structured handbook ([`docs/IAGPM_GenAI_Handbook/`](docs/IAGPM_GenAI_Handbook/))
+- **Tools:** Pre-commit gate (`pac_ci.py`), evidence viewer (`res_viewer/`) ([`tools/`](tools/))
+
+**Core APIs:**
+
+| Service | Endpoint | Purpose |
+|---------|----------|---------|
+| Policy Gateway | `POST /filter/prompt` | Runtime prompt filtering |
+| Policy Gateway | `POST /filter/output` | Runtime output filtering |
+| Policy Gateway | `POST /ci/check` | Pre-merge threshold validation |
+| RES | `POST /evidence` | Submit audit artifacts |
+| RES | `GET /risk/snapshot` | Current compliance state |
+| RES | `GET /metrics` | Prometheus metrics |
 
 ---
-tools/pac_ci.py mirrors the “Governance Gate” logic so devs can run locally before pushing.
 
----
-RES minimal API (for your docs)
-
-POST /evidence {artifactType, modelVersion, metadata, contentRef}
-
-GET /risk/snapshot?model=... → current thresholds & metrics
-
-POST /incident {severity, description, refs[]}
----
-
-this platform is a **governance-embedded operating system** for GenAI — policy checks and evidence capture are **first-class pipeline citizens**. It’s actionable for engineers (clear APIs, contracts, and infra) and legible to auditors/recruiters (traceability, dashboards, and standards alignment).
+*This platform is a **governance-embedded operating system** for GenAI—policy checks and evidence capture are first-class pipeline citizens, not afterthoughts.*
